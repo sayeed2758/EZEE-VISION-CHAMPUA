@@ -92,6 +92,7 @@ export default function Home() {
   const [galleryPaused, setGalleryPaused] = useState(false);
   const [publishedFaculty, setPublishedFaculty] = useState([]);
   const [publishedClasses, setPublishedClasses] = useState(classGroups);
+  const [publishedResults, setPublishedResults] = useState([]);
 
   useEffect(() => {
     setGalleryIndex(0);
@@ -170,6 +171,22 @@ export default function Home() {
           });
 
         setPublishedFaculty(liveFaculty);
+      }).catch(() => {})
+,
+      getDocs(collection(db, 'results')).then((snapshot) => {
+        const liveResults = snapshot.docs
+          .map((item) => ({ id: item.id, ...item.data() }))
+          .filter((item) => item.published === true)
+          .sort((a, b) => {
+            if (a.featured !== b.featured) return a.featured ? -1 : 1;
+            const orderA = Number(a.sortOrder ?? 9999);
+            const orderB = Number(b.sortOrder ?? 9999);
+            if (orderA !== orderB) return orderA - orderB;
+            return String(b.year || '').localeCompare(String(a.year || ''));
+          })
+          .slice(0, 12);
+
+        setPublishedResults(liveResults);
       }).catch(() => {})
     ]);
   }, []);
@@ -514,19 +531,154 @@ export default function Home() {
       </section>
 
       <section id="results" className="section section-anchor">
-        <div className="shell results-wrap">
-          <div className="results-copy">
-            <div className="section-kicker">RESULTS & ACHIEVEMENTS</div>
-            <h2>Every improvement is worth recognising.</h2>
-            <p>
-              This space is ready for verified student marks, board achievements, school results and other academic milestones as the coaching community grows.
-            </p>
+        <div className="shell">
+          <div className="section-head">
+            <div>
+              <div className="section-kicker">RESULTS & ACHIEVEMENTS</div>
+              <h2>Progress worth celebrating.</h2>
+            </div>
+            <p>Verified academic milestones and achievement highlights published from the secure Admin Results Manager.</p>
           </div>
-          <div className="achievement-panel">
-            <div className="achieve-card"><span>Academic</span><b>Achievements</b><small>Verified student highlights</small></div>
-            <div className="achieve-card"><span>Board</span><b>Results</b><small>Year-wise performance</small></div>
-            <div className="achieve-card"><span>Student</span><b>Progress</b><small>Consistency and growth</small></div>
-          </div>
+
+          <style>{`
+            .results-live-grid {
+              display: grid;
+              grid-template-columns: repeat(3, minmax(0, 1fr));
+              gap: 18px;
+            }
+            .result-live-card {
+              position: relative;
+              overflow: hidden;
+              min-height: 230px;
+              padding: 24px;
+              border: 1px solid rgba(15,18,41,.08);
+              border-radius: 28px;
+              background: linear-gradient(145deg, #ffffff 0%, #f7f9ff 100%);
+              box-shadow: 0 18px 50px rgba(15,18,41,.08);
+            }
+            .result-live-card.featured {
+              border-color: rgba(33,105,210,.24);
+            }
+            .result-live-card::after {
+              content: '';
+              position: absolute;
+              width: 130px;
+              height: 130px;
+              right: -48px;
+              top: -48px;
+              border-radius: 50%;
+              background: rgba(33,105,210,.08);
+            }
+            .result-live-top {
+              display: flex;
+              justify-content: space-between;
+              gap: 12px;
+              align-items: center;
+              margin-bottom: 22px;
+            }
+            .result-live-tag {
+              color: #2169d2;
+              font-size: 10px;
+              font-weight: 800;
+              letter-spacing: .16em;
+              text-transform: uppercase;
+            }
+            .result-live-year {
+              padding: 7px 10px;
+              border-radius: 999px;
+              background: #eef4ff;
+              color: #1c4f9e;
+              font-size: 11px;
+              font-weight: 800;
+            }
+            .result-live-score {
+              font-size: clamp(40px, 6vw, 58px);
+              line-height: .95;
+              font-weight: 900;
+              letter-spacing: -.06em;
+              color: #0f1229;
+            }
+            .result-live-score small {
+              margin-left: 5px;
+              font-size: 18px;
+              letter-spacing: -.02em;
+              color: #627088;
+            }
+            .result-live-title {
+              margin: 16px 0 4px;
+              font-size: 21px;
+              line-height: 1.15;
+              letter-spacing: -.03em;
+              color: #10182d;
+            }
+            .result-live-student {
+              color: #4f5d72;
+              font-size: 13px;
+              font-weight: 700;
+            }
+            .result-live-meta {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 7px;
+              margin-top: 16px;
+            }
+            .result-live-meta span {
+              padding: 7px 10px;
+              border-radius: 10px;
+              background: rgba(15,18,41,.05);
+              color: #55627a;
+              font-size: 11px;
+              font-weight: 700;
+            }
+            .result-live-desc {
+              margin: 16px 0 0;
+              color: #6c788c;
+              font-size: 13px;
+              line-height: 1.55;
+            }
+            .results-empty-public {
+              padding: 28px;
+              border: 1px dashed rgba(15,18,41,.16);
+              border-radius: 24px;
+              background: #fbfcff;
+              color: #68758a;
+            }
+            @media (max-width: 920px) {
+              .results-live-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            }
+            @media (max-width: 640px) {
+              .results-live-grid { grid-template-columns: 1fr; }
+            }
+          `}</style>
+
+          {publishedResults.length > 0 ? (
+            <div className="results-live-grid">
+              {publishedResults.map((item) => (
+                <article className={`result-live-card ${item.featured ? 'featured' : ''}`} key={item.id}>
+                  <div className="result-live-top">
+                    <span className="result-live-tag">{item.category || 'Achievement'}</span>
+                    {item.year ? <span className="result-live-year">{item.year}</span> : null}
+                  </div>
+                  <div className="result-live-score">
+                    {item.score || item.rank || item.badge || '✓'}
+                    {item.score ? <small>{item.scoreUnit || '%'}</small> : null}
+                  </div>
+                  <h3 className="result-live-title">{item.title || 'Academic Achievement'}</h3>
+                  {item.displayName ? <div className="result-live-student">{item.displayName}</div> : null}
+                  <div className="result-live-meta">
+                    {item.className ? <span>{item.className}</span> : null}
+                    {item.exam ? <span>{item.exam}</span> : null}
+                    {item.subject ? <span>{item.subject}</span> : null}
+                  </div>
+                  {item.description ? <p className="result-live-desc">{item.description}</p> : null}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="results-empty-public">
+              Academic result highlights and verified achievements will appear here as they are published from the Admin Results Manager.
+            </div>
+          )}
         </div>
       </section>
 
