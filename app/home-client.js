@@ -2052,6 +2052,7 @@ export default function Home() {
             </form>
             </div>
           </div>
+          </div>
         </div>
       ) : null}
     </main>
