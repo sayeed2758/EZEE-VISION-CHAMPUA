@@ -91,6 +91,7 @@ export default function Home() {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [galleryPaused, setGalleryPaused] = useState(false);
   const [publishedFaculty, setPublishedFaculty] = useState([]);
+  const [publishedClasses, setPublishedClasses] = useState(classGroups);
 
   useEffect(() => {
     setGalleryIndex(0);
@@ -132,6 +133,29 @@ export default function Home() {
           }));
 
         setPublishedUpdates(liveUpdates);
+      }).catch(() => {}),
+      getDocs(collection(db, 'classes')).then((snapshot) => {
+        const liveClasses = snapshot.docs
+          .map((item) => ({ id: item.id, ...item.data() }))
+          .filter((item) => item.published === true)
+          .sort((a, b) => {
+            if (a.featured !== b.featured) return a.featured ? -1 : 1;
+            const orderA = Number(a.sortOrder ?? 9999);
+            const orderB = Number(b.sortOrder ?? 9999);
+            if (orderA !== orderB) return orderA - orderB;
+            return String(a.title || '').localeCompare(String(b.title || ''));
+          });
+
+        if (liveClasses.length) {
+          setPublishedClasses(liveClasses.map((item) => ({
+            id: item.id,
+            tag: item.tag || 'Classes',
+            title: item.title || item.className || 'Class & Course',
+            text: item.description || '',
+            subjects: item.subjects || '',
+            courseInfo: item.courseInfo || ''
+          })));
+        }
       }).catch(() => {}),
       getDocs(collection(db, 'faculty')).then((snapshot) => {
         const liveFaculty = snapshot.docs
@@ -309,13 +333,14 @@ export default function Home() {
             <p>From strong foundations to senior secondary preparation, learning support is structured around the student’s stage.</p>
           </div>
           <div className="class-grid">
-            {classGroups.map((item) => (
-              <article className="class-card" key={item.title}>
+            {publishedClasses.map((item) => (
+              <article className="class-card" key={item.id || item.title}>
                 <div className="class-top"><span>{item.tag}</span><span>↗</span></div>
-                <div className="class-number">{item.title.split(' ')[1]}</div>
+                <div className="class-number">{String(item.title || '').replace(/^Classes?\s*/i, '').split(' ')[0] || '—'}</div>
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
                 <div className="class-subjects">{item.subjects}</div>
+                {item.courseInfo ? <div className="class-course-info">{item.courseInfo}</div> : null}
               </article>
             ))}
           </div>
