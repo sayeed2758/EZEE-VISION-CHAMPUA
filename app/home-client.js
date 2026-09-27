@@ -1142,7 +1142,7 @@ export default function Home() {
             <div className="ev-green-element ev-green-block-right" aria-hidden="true"></div>
 
             <img className="ev-teacher ev-teacher-left" src="/teachers/teacher-2.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
-            <img className="ev-teacher ev-teacher-center" src="/teachers/teacher-1.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
+            <img className="ev-teacher ev-teacher-center" src="/teachers/teacher-1-v2.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
             <img className="ev-teacher ev-teacher-right" src="/teachers/teacher-3.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
           </div>
 
