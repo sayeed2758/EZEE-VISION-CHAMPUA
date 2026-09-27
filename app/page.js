@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { db, firebaseConfigured } from '../lib/firebase';
 
 const classGroups = [
@@ -116,7 +116,7 @@ export default function Home() {
 
         setPublishedUpdates(liveUpdates);
       }).catch(() => {}),
-      getDocs(collection(db, 'gallery')).then((snapshot) => {
+      getDocs(query(collection(db, 'gallery'), where('published', '==', true))).then((snapshot) => {
         const liveGallery = snapshot.docs
           .map((item) => ({ id: item.id, ...item.data() }))
           .filter((item) => item.published === true && item.imageUrl)
@@ -377,18 +377,25 @@ export default function Home() {
               const fallback = DEFAULT_GALLERY[index] || DEFAULT_GALLERY[0];
               const isLive = Boolean(item.imageUrl);
               const variant = item.variant || fallback.variant;
-              const cleanImageUrl = isLive ? item.imageUrl.replace(/\"/g, '') : '';
-              const cardStyle = isLive ? {
-                backgroundImage: `linear-gradient(180deg, rgba(5, 20, 48, .08), rgba(5, 20, 48, .72)), url(\"${cleanImageUrl}\")`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              } : undefined;
+              const cleanImageUrl = isLive ? String(item.imageUrl).replace(/\"/g, '').trim() : '';
 
               return (
-                <article className={`gallery-card ${variant}`} key={item.id || `${item.title}-${index}`} style={cardStyle}>
-                  <span>{item.category || fallback.category}</span>
-                  <b>{item.title || fallback.title}</b>
-                  <small style={{ display: 'block', marginTop: 8, maxWidth: 320, color: 'rgba(255,255,255,.78)', fontSize: 11, lineHeight: 1.5 }}>{item.caption || fallback.caption}</small>
+                <article className={`gallery-card ${variant} ${isLive ? 'gallery-card-live' : ''}`} key={item.id || `${item.title}-${index}`}>
+                  {isLive ? (
+                    <img
+                      src={cleanImageUrl}
+                      alt={item.title || 'EZEE VISION CHAMPUA gallery'}
+                      className="gallery-live-image"
+                      loading="lazy"
+                      onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                    />
+                  ) : null}
+                  {isLive ? <div className="gallery-live-overlay" aria-hidden="true" /> : null}
+                  <div className="gallery-card-content">
+                    <span>{item.category || fallback.category}</span>
+                    <b>{item.title || fallback.title}</b>
+                    <small style={{ display: 'block', marginTop: 8, maxWidth: 320, color: 'rgba(255,255,255,.78)', fontSize: 11, lineHeight: 1.5 }}>{item.caption || fallback.caption}</small>
+                  </div>
                 </article>
               );
             })}
