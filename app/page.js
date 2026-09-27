@@ -370,18 +370,22 @@ export default function Home() {
               <div className="section-kicker">GALLERY</div>
               <h2>A glimpse of the EZEE VISION journey.</h2>
             </div>
-            <p>Real classroom moments, activities and achievements can be added here through the future admin panel.</p>
+            <p>Real classroom moments, activities and achievements can be published here through the Admin Gallery Manager.</p>
           </div>
           <div className="gallery-grid">
             {publishedGallery.slice(0, 4).map((item, index) => {
               const fallback = DEFAULT_GALLERY[index] || DEFAULT_GALLERY[0];
               const isLive = Boolean(item.imageUrl);
               const variant = item.variant || fallback.variant;
-              const style = isLive ? { position: 'absolute', inset: 0, zIndex: -2, backgroundImage: `url(\"${item.imageUrl.replace(/\"/g, '')}\")`, backgroundSize: 'cover', backgroundPosition: 'center' } : null;
+              const cleanImageUrl = isLive ? item.imageUrl.replace(/\"/g, '') : '';
+              const cardStyle = isLive ? {
+                backgroundImage: `linear-gradient(180deg, rgba(5, 20, 48, .08), rgba(5, 20, 48, .72)), url(\"${cleanImageUrl}\")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              } : undefined;
 
               return (
-                <article className={`gallery-card ${variant}`} key={item.id || `${item.title}-${index}`}>
-                  {isLive ? <div aria-hidden="true" style={style}></div> : null}
+                <article className={`gallery-card ${variant}`} key={item.id || `${item.title}-${index}`} style={cardStyle}>
                   <span>{item.category || fallback.category}</span>
                   <b>{item.title || fallback.title}</b>
                   <small style={{ display: 'block', marginTop: 8, maxWidth: 320, color: 'rgba(255,255,255,.78)', fontSize: 11, lineHeight: 1.5 }}>{item.caption || fallback.caption}</small>
