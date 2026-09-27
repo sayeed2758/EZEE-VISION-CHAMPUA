@@ -6,15 +6,23 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { auth, db, firebaseConfigured } from '../../../lib/firebase';
 
+function firebaseErrorText(error) {
+  const code = error?.code || 'unknown-error';
+  const message = error?.message || 'No Firebase message was returned.';
+  return `Firebase error: ${code}\n${message}`;
+}
+
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [diagnostic, setDiagnostic] = useState('');
 
   useEffect(() => {
     if (!firebaseConfigured || !auth || !db) return;
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) return;
       try {
@@ -22,43 +30,63 @@ export default function AdminLoginPage() {
         if (adminSnap.exists() && adminSnap.data()?.active === true) {
           router.replace('/admin/dashboard');
         }
-      } catch {
-        // Stay on the login page if the admin record cannot be read.
+      } catch (error) {
+        console.error('Admin session check failed:', error);
       }
     });
+
     return unsubscribe;
   }, [router]);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setMessage('');
+    setDiagnostic('');
 
     if (!firebaseConfigured || !auth || !db) {
-      setMessage('Firebase is not configured yet. Complete Phase 2 Firebase setup first.');
+      setMessage('Firebase configuration is missing from the deployed Vercel environment.');
+      setDiagnostic('Check all NEXT_PUBLIC_FIREBASE_* variables in Vercel, then redeploy.');
       return;
     }
 
     setBusy(true);
+
+    let credential;
     try {
-      const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+      credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+    } catch (error) {
+      console.error('Firebase sign-in failed:', error);
+      setMessage('Firebase sign-in failed.');
+      setDiagnostic(firebaseErrorText(error));
+      setBusy(false);
+      return;
+    }
+
+    try {
       const adminSnap = await getDoc(doc(db, 'admins', credential.user.uid));
 
-      if (!adminSnap.exists() || adminSnap.data()?.active !== true) {
+      if (!adminSnap.exists()) {
         await auth.signOut();
-        setMessage('This account is not authorized for the EZEE VISION admin panel.');
+        setMessage('Login worked, but this account is not registered as an admin.');
+        setDiagnostic(`Authenticated UID: ${credential.user.uid}\nCreate Firestore document: admins/${credential.user.uid}`);
+        setBusy(false);
+        return;
+      }
+
+      if (adminSnap.data()?.active !== true) {
+        await auth.signOut();
+        setMessage('This account is listed as an admin but is not active.');
+        setDiagnostic(`Firestore document admins/${credential.user.uid} must contain: active = true`);
+        setBusy(false);
         return;
       }
 
       router.replace('/admin/dashboard');
     } catch (error) {
-      const friendly = {
-        'auth/invalid-credential': 'Incorrect email or password.',
-        'auth/invalid-login-credentials': 'Incorrect email or password.',
-        'auth/user-not-found': 'No account found with this email.',
-        'auth/wrong-password': 'Incorrect email or password.',
-        'auth/too-many-requests': 'Too many attempts. Please try again later.'
-      };
-      setMessage(friendly[error?.code] || 'Unable to sign in. Please check the details and try again.');
+      console.error('Admin Firestore check failed:', error);
+      await auth.signOut().catch(() => {});
+      setMessage('Authentication succeeded, but the admin database check failed.');
+      setDiagnostic(firebaseErrorText(error));
     } finally {
       setBusy(false);
     }
@@ -108,7 +136,12 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          {message && <div className="admin-message">{message}</div>}
+          {message && (
+            <div className="admin-message" style={{ whiteSpace: 'pre-wrap' }}>
+              <strong>{message}</strong>
+              {diagnostic && <div style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>{diagnostic}</div>}
+            </div>
+          )}
         </div>
 
         <a className="admin-back-link" href="/">← Back to public website</a>
