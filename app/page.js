@@ -64,6 +64,13 @@ const DEFAULT_UPDATES = [
   { label: 'Community', title: 'Growing student community', text: 'Nearly 150 students have joined the EZEE VISION CHAMPUA journey in the first five months.' }
 ];
 
+const DEFAULT_GALLERY = [
+  { category: 'Classroom', title: 'Focused learning in action', caption: 'Real classroom moments will appear here as they are added from the Admin Gallery Manager.', variant: 'large' },
+  { category: 'Activities', title: 'Learning beyond the notebook', caption: 'Add activity photos to make the coaching journey more visible.', variant: 'warm' },
+  { category: 'Community', title: 'Students • Teachers • Growth', caption: 'Share authentic moments from the EZEE VISION community.', variant: 'dark' },
+  { category: 'Achievements', title: 'Celebrate every milestone', caption: 'Verified achievements and special moments can be highlighted here.', variant: 'tall' }
+];
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profile, setProfile] = useState({
@@ -80,6 +87,7 @@ export default function Home() {
     facebook: '', instagram: '', youtube: '', telegram: '', footerTagline: 'Quality Education. Personal Attention. Better Learning.'
   });
   const [publishedUpdates, setPublishedUpdates] = useState(DEFAULT_UPDATES);
+  const [publishedGallery, setPublishedGallery] = useState(DEFAULT_GALLERY);
 
   useEffect(() => {
     if (!firebaseConfigured || !db) return;
@@ -107,6 +115,28 @@ export default function Home() {
           }));
 
         setPublishedUpdates(liveUpdates);
+      }).catch(() => {}),
+      getDocs(collection(db, 'gallery')).then((snapshot) => {
+        const liveGallery = snapshot.docs
+          .map((item) => ({ id: item.id, ...item.data() }))
+          .filter((item) => item.published === true && item.imageUrl)
+          .sort((a, b) => {
+            if (a.featured !== b.featured) return a.featured ? -1 : 1;
+            const orderA = Number(a.sortOrder ?? 9999);
+            const orderB = Number(b.sortOrder ?? 9999);
+            if (orderA !== orderB) return orderA - orderB;
+            return String(b.createdAt?.seconds || '').localeCompare(String(a.createdAt?.seconds || ''));
+          })
+          .slice(0, 6)
+          .map((item) => ({
+            id: item.id,
+            category: item.category || 'Gallery',
+            title: item.title || 'EZEE VISION CHAMPUA',
+            caption: item.caption || '',
+            imageUrl: item.imageUrl
+          }));
+
+        if (liveGallery.length > 0) setPublishedGallery(liveGallery);
       }).catch(() => {})
     ]);
   }, []);
@@ -343,10 +373,21 @@ export default function Home() {
             <p>Real classroom moments, activities and achievements can be added here through the future admin panel.</p>
           </div>
           <div className="gallery-grid">
-            <div className="gallery-card large"><span>CLASSROOM</span><b>Focused learning in action</b></div>
-            <div className="gallery-card warm"><span>ACTIVITIES</span><b>Learning beyond the notebook</b></div>
-            <div className="gallery-card dark"><span>COMMUNITY</span><b>Students • Teachers • Growth</b></div>
-            <div className="gallery-card tall"><span>ACHIEVEMENTS</span><b>Celebrate every milestone</b></div>
+            {publishedGallery.slice(0, 4).map((item, index) => {
+              const fallback = DEFAULT_GALLERY[index] || DEFAULT_GALLERY[0];
+              const isLive = Boolean(item.imageUrl);
+              const variant = item.variant || fallback.variant;
+              const style = isLive ? { position: 'absolute', inset: 0, zIndex: -2, backgroundImage: `url(\"${item.imageUrl.replace(/\"/g, '')}\")`, backgroundSize: 'cover', backgroundPosition: 'center' } : null;
+
+              return (
+                <article className={`gallery-card ${variant}`} key={item.id || `${item.title}-${index}`}>
+                  {isLive ? <div aria-hidden="true" style={style}></div> : null}
+                  <span>{item.category || fallback.category}</span>
+                  <b>{item.title || fallback.title}</b>
+                  <small style={{ display: 'block', marginTop: 8, maxWidth: 320, color: 'rgba(255,255,255,.78)', fontSize: 11, lineHeight: 1.5 }}>{item.caption || fallback.caption}</small>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
