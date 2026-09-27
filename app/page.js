@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db, firebaseConfigured } from '../lib/firebase';
 
 const classGroups = [
@@ -116,7 +116,7 @@ export default function Home() {
 
         setPublishedUpdates(liveUpdates);
       }).catch(() => {}),
-      getDocs(query(collection(db, 'gallery'), where('published', '==', true))).then((snapshot) => {
+      getDocs(collection(db, 'gallery')).then((snapshot) => {
         const liveGallery = snapshot.docs
           .map((item) => ({ id: item.id, ...item.data() }))
           .filter((item) => item.published === true && item.imageUrl)
@@ -372,30 +372,115 @@ export default function Home() {
             </div>
             <p>Real classroom moments, activities and achievements can be published here through the Admin Gallery Manager.</p>
           </div>
-          <div className="gallery-grid">
+          <style>{`
+            .gallery-grid-modern {
+              display: grid;
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 20px;
+              align-items: stretch;
+            }
+            .gallery-card-modern {
+              display: flex;
+              flex-direction: column;
+              overflow: hidden;
+              min-width: 0;
+              border-radius: 28px;
+              border: 1px solid rgba(11, 36, 75, .10);
+              background: #fff;
+              box-shadow: 0 18px 44px rgba(12, 38, 76, .08);
+            }
+            .gallery-image-wrap {
+              width: 100%;
+              aspect-ratio: 16 / 9;
+              overflow: hidden;
+              background: #eef3fa;
+            }
+            .gallery-image-wrap img {
+              display: block;
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              object-position: center;
+            }
+            .gallery-copy-modern {
+              display: flex;
+              flex: 1;
+              flex-direction: column;
+              padding: 20px 22px 22px;
+              background: #fff;
+            }
+            .gallery-category-modern {
+              margin: 0 0 8px;
+              font-size: 11px;
+              font-weight: 800;
+              letter-spacing: .18em;
+              text-transform: uppercase;
+              color: #2767c9;
+            }
+            .gallery-title-modern {
+              margin: 0;
+              color: #0b1b35;
+              font-size: clamp(21px, 3vw, 30px);
+              line-height: 1.1;
+              letter-spacing: -.03em;
+            }
+            .gallery-caption-modern {
+              margin: 12px 0 0;
+              color: #64748b;
+              font-size: 14px;
+              line-height: 1.65;
+            }
+            .gallery-card-modern.is-fallback {
+              min-height: 340px;
+              justify-content: flex-end;
+              background: linear-gradient(145deg, #123f76, #081c39);
+            }
+            @media (max-width: 720px) {
+              .gallery-grid-modern {
+                grid-template-columns: 1fr;
+                gap: 16px;
+              }
+              .gallery-card-modern {
+                border-radius: 24px;
+              }
+              .gallery-copy-modern {
+                padding: 18px 18px 20px;
+              }
+            }
+          `}</style>
+          <div className="gallery-grid gallery-grid-modern">
             {publishedGallery.slice(0, 4).map((item, index) => {
               const fallback = DEFAULT_GALLERY[index] || DEFAULT_GALLERY[0];
               const isLive = Boolean(item.imageUrl);
-              const variant = item.variant || fallback.variant;
-              const cleanImageUrl = isLive ? String(item.imageUrl).replace(/\"/g, '').trim() : '';
+              const cleanImageUrl = isLive ? String(item.imageUrl).replace(/\"/g, '') : '';
 
               return (
-                <article className={`gallery-card ${variant} ${isLive ? 'gallery-card-live' : ''}`} key={item.id || `${item.title}-${index}`}>
+                <article
+                  className={`gallery-card-modern${isLive ? '' : ' is-fallback'}`}
+                  key={item.id || `${item.title}-${index}`}
+                >
                   {isLive ? (
-                    <img
-                      src={cleanImageUrl}
-                      alt={item.title || 'EZEE VISION CHAMPUA gallery'}
-                      className="gallery-live-image"
-                      loading="lazy"
-                      onError={(event) => { event.currentTarget.style.display = 'none'; }}
-                    />
-                  ) : null}
-                  {isLive ? <div className="gallery-live-overlay" aria-hidden="true" /> : null}
-                  <div className="gallery-card-content">
-                    <span>{item.category || fallback.category}</span>
-                    <b>{item.title || fallback.title}</b>
-                    <small style={{ display: 'block', marginTop: 8, maxWidth: 320, color: 'rgba(255,255,255,.78)', fontSize: 11, lineHeight: 1.5 }}>{item.caption || fallback.caption}</small>
-                  </div>
+                    <>
+                      <div className="gallery-image-wrap">
+                        <img
+                          src={cleanImageUrl}
+                          alt={item.title || fallback.title}
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="gallery-copy-modern">
+                        <div className="gallery-category-modern">{item.category || fallback.category}</div>
+                        <h3 className="gallery-title-modern">{item.title || fallback.title}</h3>
+                        <p className="gallery-caption-modern">{item.caption || fallback.caption}</p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="gallery-copy-modern" style={{ background: 'transparent', color: '#fff' }}>
+                      <div className="gallery-category-modern" style={{ color: '#c9dcff' }}>{item.category || fallback.category}</div>
+                      <h3 className="gallery-title-modern" style={{ color: '#fff' }}>{item.title || fallback.title}</h3>
+                      <p className="gallery-caption-modern" style={{ color: 'rgba(255,255,255,.78)' }}>{item.caption || fallback.caption}</p>
+                    </div>
+                  )}
                 </article>
               );
             })}
