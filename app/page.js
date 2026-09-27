@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, doc, getDoc, getDocs, onSnapshot, query, where } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, where } from 'firebase/firestore';
 import { db, firebaseConfigured } from '../lib/firebase';
 
 const classGroups = [
@@ -93,6 +93,8 @@ export default function Home() {
   const [publishedFaculty, setPublishedFaculty] = useState([]);
   const [publishedClasses, setPublishedClasses] = useState(classGroups);
   const [publishedResults, setPublishedResults] = useState([]);
+  const [enquiryForm, setEnquiryForm] = useState({ studentName: '', parentName: '', className: '', phone: '', message: '', website: '' });
+  const [enquiryState, setEnquiryState] = useState({ busy: false, type: '', text: '' });
 
   useEffect(() => {
     setGalleryIndex(0);
@@ -837,7 +839,11 @@ export default function Home() {
               text-align: right;
               letter-spacing: .08em;
             }
-            .gallery-placeholder {
+  
+          .form-note-success { color: #147746; background: #ecfbf3; border: 1px solid #c9efda; padding: 10px 12px; border-radius: 12px; }
+          .form-note-error { color: #ad3c2b; background: #fff2ef; border: 1px solid #ffd0c5; padding: 10px 12px; border-radius: 12px; }
+          .enquiry-form button:disabled { opacity: .65; cursor: wait; }
+          .gallery-placeholder {
               padding: 48px 24px;
               border: 1px dashed rgba(11, 36, 75, .16);
               border-radius: 28px;
@@ -1003,17 +1009,59 @@ export default function Home() {
               <a href={`https://wa.me/${String(profile.whatsapp).replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><span>WhatsApp</span><b>Chat with EZEE VISION</b></a>
             </div>
           </div>
-          <form className="enquiry-form" onSubmit={(e) => e.preventDefault()}>
+          <form className="enquiry-form" onSubmit={async (e) => {
+            e.preventDefault();
+            if (enquiryState.busy) return;
+            if (enquiryForm.website) return;
+            const studentName = enquiryForm.studentName.trim();
+            const parentName = enquiryForm.parentName.trim();
+            const className = enquiryForm.className.trim();
+            const phone = enquiryForm.phone.trim();
+            const message = enquiryForm.message.trim();
+            if (!studentName || !parentName || !className || !phone) {
+              setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parent / Guardian Name, Class and Phone.' });
+              return;
+            }
+            if (!/^[0-9+()\-\s]{10,18}$/.test(phone)) {
+              setEnquiryState({ busy: false, type: 'error', text: 'Please enter a valid phone number.' });
+              return;
+            }
+            if (!firebaseConfigured || !db) {
+              setEnquiryState({ busy: false, type: 'error', text: 'Enquiry service is temporarily unavailable. Please call or WhatsApp us.' });
+              return;
+            }
+            setEnquiryState({ busy: true, type: '', text: '' });
+            try {
+              await addDoc(collection(db, 'enquiries'), {
+                studentName,
+                parentName,
+                className,
+                phone,
+                message,
+                createdAt: serverTimestamp(),
+                source: 'website',
+                status: 'new'
+              });
+              setEnquiryForm({ studentName: '', parentName: '', className: '', phone: '', message: '', website: '' });
+              setEnquiryState({ busy: false, type: 'success', text: 'Thank you. Your admission enquiry has been received. The coaching team will contact you soon.' });
+            } catch (error) {
+              setEnquiryState({ busy: false, type: 'error', text: error?.message || 'Unable to submit your enquiry right now. Please use Call or WhatsApp.' });
+            }
+          }} noValidate>
             <div className="form-title">Admission Enquiry</div>
-            <label>Student Name<input placeholder="Enter student name" /></label>
-            <label>Parent / Guardian Name<input placeholder="Enter parent or guardian name" /></label>
+            <label>Student Name<input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Enter student name" autoComplete="name" /></label>
+            <label>Parent / Guardian Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parent or guardian name" autoComplete="name" /></label>
             <div className="form-row">
-              <label>Class<select defaultValue=""><option value="" disabled>Select class</option>{['4','5','6','7','8','9','10','11','12'].map((c) => <option key={c}>{c}</option>)}</select></label>
-              <label>Phone<input placeholder="10-digit mobile number" inputMode="numeric" /></label>
+              <label>Class<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>Select class</option>{['4','5','6','7','8','9','10','11','12'].map((c) => <option key={c}>{c}</option>)}</select></label>
+              <label>Phone<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
             </div>
-            <label>Message<textarea placeholder="Tell us what you would like to know..."></textarea></label>
-            <button className="btn btn-primary btn-lg" type="submit">Submit Enquiry <span>→</span></button>
-            <small className="form-note">Phase 1 demo form — backend enquiry storage will be added in the Admin phase.</small>
+            <label>Message<textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Tell us what you would like to know..."></textarea></label>
+            <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+              <label>Website<input value={enquiryForm.website} onChange={(e) => setEnquiryForm((v) => ({ ...v, website: e.target.value }))} tabIndex={-1} autoComplete="off" /></label>
+            </div>
+            {enquiryState.text ? <div className={enquiryState.type === 'error' ? 'form-note form-note-error' : 'form-note form-note-success'} role="status">{enquiryState.text}</div> : null}
+            <button className="btn btn-primary btn-lg" type="submit" disabled={enquiryState.busy}>{enquiryState.busy ? 'Submitting…' : <>Submit Enquiry <span>→</span></>}</button>
+            <small className="form-note">Your details are used only to respond to this admission enquiry.</small>
           </form>
         </div>
       </section>
