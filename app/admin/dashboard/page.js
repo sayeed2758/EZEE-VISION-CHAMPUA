@@ -48,6 +48,12 @@ const moduleRoadmap = [
     phase: '3.6'
   },
   {
+    key: 'results',
+    label: 'Results & Achievements',
+    description: 'Publish verified academic achievements, milestones and result highlights.',
+    phase: '3.7'
+  },
+  {
     key: 'enquiries',
     label: 'Admission Enquiries',
     description: 'Review website enquiries and follow up with prospective students.',
@@ -297,7 +303,7 @@ export default function AdminDashboardPage() {
 
           <div className={styles.moduleGrid}>
             {moduleRoadmap.map((module) => (
-              <article className={`${styles.moduleCard} ${['profile', 'updates', 'gallery', 'faculty', 'classes'].includes(module.key) ? styles.moduleCardActive : ''}`} key={module.key}>
+              <article className={`${styles.moduleCard} ${['profile', 'updates', 'gallery', 'faculty', 'classes', 'results'].includes(module.key) ? styles.moduleCardActive : ''}`} key={module.key}>
                 <div className={styles.moduleTop}>
                   <span className={styles.moduleIcon}>{module.label.slice(0, 1)}</span>
                   <span className={styles.phaseTag}>NEXT • {module.phase}</span>
@@ -323,6 +329,10 @@ export default function AdminDashboardPage() {
                 ) : module.key === 'classes' ? (
                   <button className={styles.openButton} type="button" onClick={() => router.push('/admin/classes')}>
                     Open Classes Manager →
+                  </button>
+                ) : module.key === 'results' ? (
+                  <button className={styles.openButton} type="button" onClick={() => router.push('/admin/results')}>
+                    Open Results Manager →
                   </button>
                 ) : (
                   <button className={styles.lockedButton} type="button" disabled>
