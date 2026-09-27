@@ -8,8 +8,8 @@ import { auth, db, firebaseConfigured } from '../../../lib/firebase';
 import styles from './contact.module.css';
 
 const DEFAULTS = {
-  phone: '+91 99999 99999',
-  whatsapp: '919999999999',
+  phone: '+918917225693',
+  whatsapp: '+918917225693',
   email: '',
   address: 'Champua, Odisha',
   mapUrl: '',
@@ -19,7 +19,7 @@ const DEFAULTS = {
   telegram: '',
   contactTitle: 'Let’s connect',
   contactText: 'Have a question about classes, batches or admissions? Contact EZEE VISION CHAMPUA.',
-  officeHours: 'Monday – Saturday | 8:00 AM – 8:00 PM'
+  officeHours: 'Monday – Saturday | 7:00 AM – 9:00 PM'
 };
 
 export default function ContactManagerPage() {
