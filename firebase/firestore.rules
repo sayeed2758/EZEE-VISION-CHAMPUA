@@ -1,0 +1,78 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+
+    // Admin profile documents are controlled from the Firebase Console / trusted backend.
+    // A signed-in user may only read their own admin document.
+    match /admins/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+
+    // Public website content: anyone may read; only active admins may change it.
+    match /siteContent/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /classes/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /faculty/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /results/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /testimonials/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /gallery/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /updates/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Website visitors may submit an admission enquiry, but only admins may read or manage it.
+    match /enquiries/{enquiryId} {
+      allow create: if request.resource.data.keys().hasAll([
+          'studentName', 'parentName', 'className', 'phone', 'createdAt'
+        ])
+        && request.resource.data.studentName is string
+        && request.resource.data.parentName is string
+        && request.resource.data.className is string
+        && request.resource.data.phone is string
+        && request.resource.data.createdAt is timestamp;
+
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Nothing else is accessible.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
