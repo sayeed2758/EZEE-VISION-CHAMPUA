@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db, firebaseConfigured } from '../../../lib/firebase';
 import styles from './faculty.module.css';
@@ -56,9 +56,8 @@ export default function FacultyManager() {
 
       try {
         const token = await user.getIdTokenResult();
-        const adminSnap = await getDocs(collection(db, 'admins'));
-        const matched = adminSnap.docs.find((item) => item.id === user.uid);
-        const isAdmin = Boolean(token.claims?.admin) || Boolean(matched?.data()?.active === true);
+        const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+        const isAdmin = Boolean(token.claims?.admin) || Boolean(adminSnap.exists() && adminSnap.data()?.active === true);
         setAuthorized(isAdmin);
       } catch {
         setAuthorized(false);
