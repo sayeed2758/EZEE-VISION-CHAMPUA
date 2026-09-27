@@ -375,103 +375,115 @@ export default function Home() {
         .ev-site-chrome,
         .ev-site-chrome * {
           -webkit-tap-highlight-color: transparent;
+          box-sizing: border-box;
         }
         .ev-topbar {
           position: relative;
           z-index: 40;
-          background: linear-gradient(135deg, #073b8f 0%, #0b4cae 52%, #0a3b86 100%);
+          background: linear-gradient(135deg, #063d91 0%, #0754b7 52%, #063d91 100%);
           color: #fff;
-          box-shadow: 0 10px 30px rgba(3, 27, 73, .16);
+          box-shadow: 0 8px 22px rgba(3, 27, 73, .14);
         }
         .ev-topbar-inner {
-          max-width: 1240px;
+          width: min(1240px, 100%);
           margin: 0 auto;
-          min-height: 68px;
-          padding: 10px 22px;
-          display: flex;
+          min-height: 54px;
+          padding: 6px 18px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
           align-items: center;
-          justify-content: space-between;
-          gap: 18px;
+          gap: 10px;
         }
         .ev-phone-list {
-          display: flex;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 10px 18px;
           min-width: 0;
-        }
-        .ev-phone-link {
-          display: inline-flex;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           align-items: center;
           gap: 7px;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+        .ev-phone-link {
+          min-width: 0;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          overflow: hidden;
           color: #fff;
           text-decoration: none;
-          font-size: 14px;
-          font-weight: 700;
-          letter-spacing: .01em;
+          font-size: clamp(8.5px, 1.05vw, 12px);
+          font-weight: 800;
+          line-height: 1;
+          letter-spacing: .005em;
           white-space: nowrap;
-          transition: opacity .18s ease, transform .18s ease;
+          text-overflow: clip;
+          transition: opacity .16s ease, transform .16s ease;
         }
         .ev-phone-link::before {
           content: '☎';
+          flex: 0 0 auto;
           display: grid;
           place-items: center;
-          width: 25px;
-          height: 25px;
+          width: 20px;
+          height: 20px;
           border-radius: 50%;
-          color: #ffd54a;
-          background: rgba(255,255,255,.08);
-          font-size: 13px;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
+          color: #ffd52a;
+          background: rgba(255,255,255,.09);
+          font-size: 10px;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.17);
         }
         .ev-phone-link:hover { opacity: .86; }
-        .ev-phone-link:active { transform: translateY(1px); opacity: .72; }
+        .ev-phone-link:active { transform: translateY(1px); opacity: .70; }
         .ev-download-btn {
+          width: 100px;
+          min-width: 100px;
+          height: 40px;
+          padding: 0 9px;
+          border: 1px solid rgba(255,255,255,.20);
+          border-radius: 12px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 10px;
-          min-width: 174px;
-          min-height: 46px;
-          padding: 0 19px;
-          border: 1px solid rgba(255,255,255,.20);
-          border-radius: 13px;
-          background: linear-gradient(145deg, #18a90f 0%, #07870c 100%);
+          gap: 6px;
+          background: linear-gradient(145deg, #16ad15 0%, #078b0d 100%);
           color: #fff;
-          font-size: 14px;
+          font-size: 10px;
           font-weight: 900;
-          letter-spacing: .02em;
+          letter-spacing: .01em;
+          white-space: nowrap;
           cursor: pointer;
-          box-shadow: 0 8px 16px rgba(2, 66, 2, .24), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -3px 0 rgba(0,0,0,.10);
-          transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+          box-shadow: 0 6px 12px rgba(2, 66, 2, .22), inset 0 1px 0 rgba(255,255,255,.23), inset 0 -3px 0 rgba(0,0,0,.10);
+          transition: transform .15s ease, opacity .15s ease;
         }
-        .ev-download-btn .ev-download-icon { font-size: 18px; line-height: 1; }
-        .ev-download-btn:active { transform: translateY(2px) scale(.99); opacity: .82; box-shadow: 0 4px 10px rgba(2,66,2,.20), inset 0 1px 0 rgba(255,255,255,.16); }
+        .ev-download-btn .ev-download-icon { font-size: 14px; line-height: 1; }
+        .ev-download-btn:active { transform: translateY(2px) scale(.99); opacity: .80; }
         .ev-main-header {
           position: sticky;
           top: 0;
           z-index: 35;
-          background: rgba(255,255,255,.97);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          border-bottom: 1px solid rgba(8, 43, 91, .08);
-          box-shadow: 0 10px 30px rgba(13, 41, 83, .08);
+          background: rgba(255,255,255,.98);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-bottom: 1px solid rgba(8,43,91,.08);
+          box-shadow: 0 7px 22px rgba(13,41,83,.07);
         }
         .ev-main-header-inner {
-          max-width: 1240px;
+          width: min(1240px, 100%);
           margin: 0 auto;
-          min-height: 84px;
-          padding: 12px 22px;
-          display: flex;
+          min-height: 66px;
+          padding: 7px 18px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto 46px;
           align-items: center;
-          gap: 18px;
+          gap: 8px;
         }
         .ev-brand {
+          min-width: 0;
+          width: max-content;
+          max-width: 100%;
           display: inline-flex;
           align-items: center;
-          gap: 12px;
-          min-width: 0;
-          flex: 1 1 auto;
+          gap: 8px;
           padding: 0;
           border: 0;
           background: transparent;
@@ -479,84 +491,69 @@ export default function Home() {
           text-align: left;
         }
         .ev-brand-mark {
-          position: relative;
           flex: 0 0 auto;
-          width: 58px;
-          height: 58px;
-          display: grid;
-          place-items: center;
-          border-radius: 17px;
-          background: linear-gradient(145deg, #0c55bb 0%, #093c8d 58%, #062e70 100%);
-          color: #fff;
-          font-size: 20px;
-          font-weight: 950;
-          letter-spacing: -.07em;
-          box-shadow: 0 10px 22px rgba(6, 58, 142, .22), inset 0 2px 0 rgba(255,255,255,.25), inset 0 -4px 0 rgba(0,0,0,.12);
+          width: 44px;
+          height: 44px;
+          display: block;
+          object-fit: contain;
+          object-position: center;
+          border-radius: 12px;
+          filter: drop-shadow(0 5px 9px rgba(4,47,105,.17));
         }
-        .ev-brand-mark::after {
-          content: '';
-          position: absolute;
-          width: 10px;
-          height: 10px;
-          right: 7px;
-          top: 7px;
-          border-radius: 50%;
-          background: #ffd447;
-          box-shadow: 0 2px 6px rgba(0,0,0,.18);
+        .ev-brand-copy {
+          min-width: 0;
+          display: flex;
+          align-items: center;
         }
-        .ev-brand-copy { min-width: 0; }
         .ev-brand-copy strong {
           display: block;
+          max-width: 100%;
+          overflow: hidden;
           color: #081a39;
-          font-size: clamp(20px, 2.4vw, 28px);
+          font-size: clamp(15px, 2vw, 21px);
           line-height: 1;
-          letter-spacing: -.055em;
+          letter-spacing: -.045em;
           text-transform: uppercase;
+          white-space: nowrap;
+          text-overflow: ellipsis;
         }
-        .ev-brand-copy small {
-          display: block;
-          margin-top: 5px;
-          color: #52709d;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: .22em;
-          text-transform: uppercase;
-        }
+        .ev-brand-copy small { display: none; }
         .ev-register-btn {
           flex: 0 0 auto;
-          min-height: 48px;
-          padding: 0 25px;
-          border: 1px solid rgba(0, 111, 0, .13);
+          min-height: 40px;
+          padding: 0 16px;
+          border: 1px solid rgba(0,111,0,.13);
           border-radius: 999px;
-          background: linear-gradient(145deg, #15b31a 0%, #079c0e 52%, #07860b 100%);
+          background: linear-gradient(145deg, #14b319 0%, #079c10 52%, #07870b 100%);
           color: #fff;
-          font-size: 13px;
+          font-size: 10px;
           font-weight: 950;
-          letter-spacing: .13em;
+          letter-spacing: .10em;
           text-transform: uppercase;
-          box-shadow: 0 10px 20px rgba(7, 133, 13, .19), inset 0 2px 0 rgba(255,255,255,.20), inset 0 -3px 0 rgba(0,0,0,.10);
+          white-space: nowrap;
+          box-shadow: 0 7px 16px rgba(7,133,13,.18), inset 0 2px 0 rgba(255,255,255,.20), inset 0 -3px 0 rgba(0,0,0,.10);
           cursor: pointer;
-          transition: transform .16s ease, opacity .16s ease;
+          transition: transform .15s ease, opacity .15s ease;
         }
         .ev-register-btn:active { transform: translateY(2px) scale(.99); opacity: .78; }
         .ev-menu-btn {
-          flex: 0 0 auto;
-          width: 52px;
-          height: 52px;
+          width: 46px;
+          height: 46px;
           display: grid;
           place-items: center;
+          align-content: center;
           gap: 5px;
-          padding: 13px;
+          padding: 10px;
           border: 0;
-          border-radius: 14px;
-          background: rgba(7, 44, 93, .045);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 6px 18px rgba(20, 55, 93, .08);
+          border-radius: 13px;
+          background: rgba(7,44,93,.04);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.86), 0 5px 15px rgba(20,55,93,.06);
           cursor: pointer;
-          transition: transform .16s ease, background .16s ease, opacity .16s ease;
+          transition: transform .15s ease, background .15s ease, opacity .15s ease;
         }
         .ev-menu-btn span {
           display: block;
-          width: 25px;
+          width: 24px;
           height: 3px;
           border-radius: 99px;
           background: #0a1630;
@@ -565,60 +562,70 @@ export default function Home() {
         .ev-menu {
           max-width: 1240px;
           margin: 0 auto;
-          padding: 0 22px 14px;
+          padding: 0 18px 11px;
         }
         .ev-menu-panel {
           display: grid;
-          grid-template-columns: repeat(6, minmax(0, 1fr));
-          gap: 8px;
-          padding: 10px;
-          border: 1px solid rgba(9, 50, 104, .09);
-          border-radius: 18px;
+          grid-template-columns: repeat(6, minmax(0,1fr));
+          gap: 7px;
+          padding: 9px;
+          border: 1px solid rgba(9,50,104,.09);
+          border-radius: 16px;
           background: #fff;
-          box-shadow: 0 18px 34px rgba(10, 38, 79, .10);
+          box-shadow: 0 15px 30px rgba(10,38,79,.09);
         }
         .ev-menu-panel button {
-          min-height: 44px;
+          min-height: 42px;
           border: 0;
-          border-radius: 11px;
+          border-radius: 10px;
           background: transparent;
           color: #0c2247;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 800;
           cursor: pointer;
-          transition: background .16s ease, transform .16s ease, opacity .16s ease;
+          transition: background .15s ease, transform .15s ease, opacity .15s ease;
         }
         .ev-menu-panel button:hover { background: #eef5ff; }
-        .ev-menu-panel button:active { transform: translateY(1px); opacity: .70; }
-        @media (max-width: 900px) {
-          .ev-topbar-inner, .ev-main-header-inner { padding-left: 16px; padding-right: 16px; }
-          .ev-menu-panel { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-          .ev-download-btn { min-width: 148px; }
-        }
-        @media (max-width: 660px) {
-          .ev-topbar-inner { min-height: 74px; align-items: stretch; }
-          .ev-phone-list { gap: 6px 12px; align-content: center; }
-          .ev-phone-link { font-size: 11px; }
-          .ev-phone-link::before { width: 20px; height: 20px; font-size: 10px; }
-          .ev-download-btn { min-width: 126px; min-height: 44px; padding: 0 12px; font-size: 11px; border-radius: 12px; }
-          .ev-download-btn .ev-download-icon { font-size: 15px; }
-          .ev-main-header-inner { min-height: 72px; gap: 9px; }
-          .ev-brand-mark { width: 46px; height: 46px; border-radius: 14px; font-size: 16px; }
-          .ev-brand-copy strong { font-size: 16px; }
-          .ev-brand-copy small { font-size: 8px; margin-top: 4px; letter-spacing: .18em; }
-          .ev-register-btn { min-height: 42px; padding: 0 14px; font-size: 10px; letter-spacing: .10em; }
-          .ev-menu-btn { width: 44px; height: 44px; padding: 10px; border-radius: 12px; }
-          .ev-menu-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .ev-menu-panel button:active { transform: translateY(1px); opacity: .68; }
+        @media (max-width: 700px) {
+          .ev-topbar-inner { min-height: 48px; padding: 5px 9px; gap: 7px; }
+          .ev-phone-list { gap: 5px; }
+          .ev-phone-link { font-size: 8px; gap: 3px; }
+          .ev-phone-link::before { width: 17px; height: 17px; font-size: 9px; }
+          .ev-download-btn { width: 94px; min-width: 94px; height: 36px; padding: 0 7px; border-radius: 11px; font-size: 9px; }
+          .ev-download-btn .ev-download-icon { font-size: 13px; }
+          .ev-main-header-inner { min-height: 61px; padding: 6px 9px; grid-template-columns: minmax(0,1fr) auto 42px; gap: 6px; }
+          .ev-brand { gap: 7px; width: 100%; }
+          .ev-brand-mark { width: 41px; height: 41px; border-radius: 11px; }
+          .ev-brand-copy strong { font-size: 15px; letter-spacing: -.05em; }
+          .ev-register-btn { min-height: 37px; padding: 0 12px; font-size: 9px; letter-spacing: .08em; }
+          .ev-menu-btn { width: 42px; height: 42px; border-radius: 11px; padding: 9px; }
+          .ev-menu-btn span { width: 23px; height: 3px; }
+          .ev-menu { padding: 0 9px 9px; }
+          .ev-menu-panel { grid-template-columns: repeat(2,minmax(0,1fr)); }
         }
         @media (max-width: 430px) {
-          .ev-topbar-inner { padding: 8px 11px; gap: 9px; }
-          .ev-phone-list { max-width: calc(100% - 126px); }
-          .ev-phone-link { font-size: 9px; gap: 4px; }
-          .ev-phone-link:nth-child(3) { width: 100%; }
-          .ev-download-btn { min-width: 116px; padding: 0 9px; font-size: 10px; }
-          .ev-main-header-inner { padding: 9px 11px; }
-          .ev-brand-copy small { letter-spacing: .12em; }
-          .ev-register-btn { padding: 0 10px; font-size: 9px; }
+          .ev-topbar-inner { grid-template-columns: minmax(0,1fr) 92px; }
+          .ev-phone-list { gap: 3px; }
+          .ev-phone-link { font-size: 7.4px; gap: 2px; font-weight: 850; }
+          .ev-phone-link::before { width: 16px; height: 16px; font-size: 8px; }
+          .ev-download-btn { width: 92px; min-width: 92px; height: 35px; font-size: 8.5px; padding: 0 5px; }
+          .ev-download-btn .ev-download-icon { font-size: 12px; }
+          .ev-main-header-inner { grid-template-columns: minmax(0,1fr) auto 42px; }
+          .ev-brand-copy strong { font-size: 14px; }
+          .ev-brand-mark { width: 39px; height: 39px; }
+          .ev-register-btn { min-height: 36px; padding: 0 10px; font-size: 8.2px; }
+        }
+        @media (max-width: 360px) {
+          .ev-topbar-inner { grid-template-columns: minmax(0,1fr) 88px; }
+          .ev-phone-link { font-size: 7px; }
+          .ev-download-btn { width: 88px; min-width: 88px; font-size: 8px; }
+          .ev-main-header-inner { grid-template-columns: minmax(0,1fr) auto 38px; gap: 5px; }
+          .ev-brand-mark { width: 36px; height: 36px; }
+          .ev-brand-copy strong { font-size: 12.5px; }
+          .ev-register-btn { min-height: 34px; padding: 0 8px; font-size: 7.5px; letter-spacing: .06em; }
+          .ev-menu-btn { width: 38px; height: 38px; }
+          .ev-menu-btn span { width: 21px; }
         }
       `}</style>
 
@@ -724,7 +731,7 @@ export default function Home() {
         <header className="ev-main-header">
           <div className="ev-main-header-inner">
             <button className="ev-brand" onClick={() => goTo('home')} aria-label="Go to EZEE VISION CHAMPUA home">
-              <span className="ev-brand-mark">EV</span>
+              <img className="ev-brand-mark" src="/ezee-vision-logo.png" alt="EZEE VISION CHAMPUA logo" />
               <span className="ev-brand-copy">
                 <strong>EZEE VISION CHAMPUA</strong>
                 <small>{profile.tagline || 'Quality Education · Personal Attention'}</small>
@@ -1570,6 +1577,12 @@ export default function Home() {
         </div>
       </section>
 
+      <style>{`
+        .ev-footer-brand-wrap { display:flex; align-items:center; gap:10px; }
+        .ev-footer-logo { width:42px; height:42px; object-fit:contain; flex:0 0 auto; filter:drop-shadow(0 4px 8px rgba(4,47,105,.13)); }
+        @media (max-width:560px) { .ev-footer-logo { width:36px; height:36px; } }
+      `}</style>
+
       <section id="contact" className="section contact-section section-anchor">
         <div className="shell contact-grid">
           <div>
@@ -1600,7 +1613,13 @@ export default function Home() {
 
       <footer className="footer">
         <div className="shell footer-grid">
-          <div><div className="footer-brand">{profile.shortName} <span>{profile.locationLabel}</span></div><p>{profile.footerTagline}</p></div>
+          <div>
+            <div className="ev-footer-brand-wrap">
+              <img className="ev-footer-logo" src="/ezee-vision-logo.png" alt="EZEE VISION CHAMPUA logo" />
+              <div className="footer-brand">{profile.shortName} <span>{profile.locationLabel}</span></div>
+            </div>
+            <p>{profile.footerTagline}</p>
+          </div>
           <div className="footer-links"><button onClick={() => goTo('about')}>About</button><button onClick={() => goTo('classes')}>Classes</button><button onClick={() => goTo('faculty')}>Faculty</button><button onClick={() => goTo('contact')}>Contact</button></div>
           <div className="footer-social">{(profile.contactPhones || [profile.phone]).map((number, index) => <a key={`call-${number}-${index}`} href={`tel:${String(number).replace(/[^0-9+]/g, '')}`}>Call {index + 1}</a>)}{(profile.whatsappNumbers || profile.contactPhones || [profile.whatsapp]).map((number, index) => <a key={`wa-${number}-${index}`} href={`https://wa.me/${String(number).replace(/\D/g, '')}`} target="_blank" rel="noreferrer">WhatsApp {index + 1}</a>)}{profile.youtube ? <a href={profile.youtube} target="_blank" rel="noreferrer">YouTube</a> : null}{profile.instagram ? <a href={profile.instagram} target="_blank" rel="noreferrer">Instagram</a> : null}</div>
         </div>
