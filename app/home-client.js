@@ -636,17 +636,21 @@ export default function Home() {
           z-index: 100;
           display: grid;
           place-items: center;
-          padding: 14px;
-          background: rgba(4, 18, 42, .66);
-          backdrop-filter: blur(11px);
-          -webkit-backdrop-filter: blur(11px);
+          padding: 16px 10px 22px;
+          background: rgba(0, 0, 0, .68);
+          backdrop-filter: blur(3px);
+          -webkit-backdrop-filter: blur(3px);
           overscroll-behavior: contain;
+        }
+        .ev-enquiry-stage {
+          position: relative;
+          width: min(520px, calc(100vw - 30px));
         }
         .ev-enquiry-modal {
           position: relative;
-          width: min(570px, 100%);
-          max-height: min(82vh, 720px);
-          overflow: auto;
+          width: 100%;
+          max-height: min(70vh, 610px);
+          overflow: hidden;
           border: 1px solid rgba(10, 52, 108, .12);
           border-radius: 20px;
           background: #fff;
@@ -664,32 +668,35 @@ export default function Home() {
         .ev-enquiry-banner {
           width: 100%;
           display: block;
-          aspect-ratio: 3 / 1;
+          aspect-ratio: 3.35 / 1;
           object-fit: cover;
           object-position: center;
         }
         .ev-enquiry-close {
           position: absolute;
-          top: 10px;
-          right: 10px;
-          width: 40px;
-          height: 40px;
+          top: -46px;
+          right: 0;
+          width: 38px;
+          height: 38px;
           display: grid;
           place-items: center;
-          border: 1px solid rgba(255,255,255,.58);
-          border-radius: 50%;
-          background: rgba(3, 18, 39, .58);
+          border: 0;
+          background: transparent;
           color: #fff;
-          font-size: 28px;
+          font-size: 34px;
+          font-weight: 400;
           line-height: 1;
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
-          box-shadow: 0 8px 20px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.17);
+          text-shadow: 0 2px 10px rgba(0,0,0,.55);
         }
-        .ev-enquiry-close:active { transform: scale(.95); opacity: .78; }
+        .ev-enquiry-close:active { transform: scale(.90); opacity: .72; }
         .ev-enquiry-modal-body {
-          padding: 18px 20px 20px;
+          max-height: calc(min(70vh, 610px) - 174px);
+          overflow-y: auto;
+          padding: 15px 17px 17px;
           background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
+          overscroll-behavior: contain;
         }
         .ev-enquiry-modal-label {
           display: inline-flex;
@@ -712,7 +719,7 @@ export default function Home() {
         .ev-enquiry-modal-title {
           margin: 0;
           color: #0a1c3d;
-          font-size: clamp(20px, 3.2vw, 25px);
+          font-size: clamp(19px, 3.1vw, 23px);
           line-height: 1.04;
           letter-spacing: -.045em;
         }
@@ -724,7 +731,7 @@ export default function Home() {
         }
         .ev-enquiry-form {
           display: grid;
-          gap: 9px;
+          gap: 8px;
           margin: 0;
         }
         .ev-enquiry-form label {
@@ -745,8 +752,8 @@ export default function Home() {
         .ev-enquiry-form textarea,
         .ev-enquiry-form select {
           width: 100%;
-          min-height: 46px;
-          padding: 0 12px;
+          min-height: 42px;
+          padding: 0 11px;
           border: 1.5px solid rgba(18, 34, 58, .40);
           border-radius: 10px;
           outline: none;
@@ -762,7 +769,7 @@ export default function Home() {
           transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
         }
         .ev-enquiry-form textarea {
-          min-height: 70px;
+          min-height: 62px;
           padding-top: 10px;
           padding-bottom: 10px;
           resize: vertical;
@@ -782,7 +789,7 @@ export default function Home() {
         .ev-enquiry-form > .btn,
         .ev-enquiry-form button[type='submit'] {
           width: 100%;
-          min-height: 48px;
+          min-height: 44px;
           margin-top: 2px;
           border-radius: 10px;
           background: linear-gradient(145deg, #0c4a85 0%, #063665 55%, #052d59 100%);
@@ -796,11 +803,12 @@ export default function Home() {
         .ev-enquiry-form button[type='submit']:active { transform: translateY(2px); opacity: .82; }
         .ev-enquiry-form .form-note { font-size: 10px; line-height: 1.35; }
         @media (max-width: 560px) {
-          .ev-enquiry-overlay { padding: 8px; }
-          .ev-enquiry-modal { width: 100%; max-height: 82vh; border-radius: 18px; }
+          .ev-enquiry-overlay { padding: 12px 8px 18px; }
+          .ev-enquiry-stage { width: min(520px, calc(100vw - 16px)); }
+          .ev-enquiry-modal { width: 100%; max-height: 68vh; border-radius: 18px; }
           .ev-enquiry-banner-wrap { border-radius: 18px 18px 0 0; }
-          .ev-enquiry-close { top: 7px; right: 7px; width: 34px; height: 34px; font-size: 22px; }
-          .ev-enquiry-modal-body { padding: 15px 14px 17px; }
+          .ev-enquiry-close { top: -40px; right: -1px; width: 34px; height: 34px; font-size: 30px; }
+          .ev-enquiry-modal-body { max-height: calc(68vh - 150px); padding: 13px 13px 15px; }
           .ev-enquiry-modal-label { font-size: 8.5px; margin-bottom: 5px; }
           .ev-enquiry-modal-title { font-size: 21px; }
           .ev-enquiry-modal-subtitle { font-size: 11px; margin: 5px 0 10px; }
@@ -808,10 +816,10 @@ export default function Home() {
           .ev-enquiry-form .form-row { grid-template-columns: 1fr; gap: 8px; }
           .ev-enquiry-form input,
           .ev-enquiry-form textarea,
-          .ev-enquiry-form select { min-height: 46px; font-size: 14px; padding-left: 11px; padding-right: 11px; }
-          .ev-enquiry-form textarea { min-height: 66px; }
+          .ev-enquiry-form select { min-height: 42px; font-size: 13px; padding-left: 10px; padding-right: 10px; }
+          .ev-enquiry-form textarea { min-height: 60px; }
           .ev-enquiry-form > .btn,
-          .ev-enquiry-form button[type='submit'] { min-height: 46px; font-size: 14px; }
+          .ev-enquiry-form button[type='submit'] { min-height: 43px; font-size: 13px; }
         }
       `}</style>
 
@@ -1751,15 +1759,16 @@ export default function Home() {
             if (event.target === event.currentTarget) setEnquiryModalOpen(false);
           }}
         >
-          <div className="ev-enquiry-modal">
-            <div className="ev-enquiry-banner-wrap">
-              <img
-                className="ev-enquiry-banner"
-                src="/enquiry-banner.png"
-                alt="EZEE VISION CHAMPUA admission banner"
-              />
-              <button type="button" className="ev-enquiry-close" onClick={() => setEnquiryModalOpen(false)} aria-label="Close admission enquiry">×</button>
-            </div>
+          <div className="ev-enquiry-stage">
+            <button type="button" className="ev-enquiry-close" onClick={() => setEnquiryModalOpen(false)} aria-label="Close admission enquiry">×</button>
+            <div className="ev-enquiry-modal">
+              <div className="ev-enquiry-banner-wrap">
+                <img
+                  className="ev-enquiry-banner"
+                  src="/enquiry-banner.png"
+                  alt="EZEE VISION CHAMPUA admission banner"
+                />
+              </div>
             <div className="ev-enquiry-modal-body">
               <div className="ev-enquiry-modal-label">Admission Enquiry</div>
               <h2 className="ev-enquiry-modal-title">Join EZEE VISION CHAMPUA</h2>
