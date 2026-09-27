@@ -636,73 +636,175 @@ export default function Home() {
           z-index: 100;
           display: grid;
           place-items: center;
-          padding: 18px;
-          background: rgba(3, 16, 36, .64);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+          padding: 14px;
+          background: rgba(4, 18, 42, .66);
+          backdrop-filter: blur(11px);
+          -webkit-backdrop-filter: blur(11px);
+          overscroll-behavior: contain;
         }
         .ev-enquiry-modal {
+          position: relative;
           width: min(680px, 100%);
-          max-height: min(88vh, 820px);
+          max-height: min(92vh, 860px);
           overflow: auto;
-          border: 1px solid rgba(12, 66, 130, .14);
-          border-radius: 26px;
+          border: 1px solid rgba(10, 52, 108, .12);
+          border-radius: 24px;
           background: #fff;
-          box-shadow: 0 35px 90px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.8);
-          padding: 24px;
+          box-shadow: 0 36px 90px rgba(0,0,0,.34), 0 10px 26px rgba(4, 47, 105, .12), inset 0 1px 0 rgba(255,255,255,.94);
+          scrollbar-width: thin;
+          scrollbar-color: rgba(10, 54, 112, .24) transparent;
         }
-        .ev-enquiry-modal-head {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 18px;
-          margin-bottom: 18px;
+        .ev-enquiry-banner-wrap {
+          position: relative;
+          width: 100%;
+          overflow: hidden;
+          border-radius: 24px 24px 0 0;
+          background: #061c3f;
         }
-        .ev-enquiry-modal-kicker {
-          margin-bottom: 8px;
-          color: #0b5cbb;
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: .19em;
-        }
-        .ev-enquiry-modal h2 {
-          margin: 0;
-          color: #0a1c3d;
-          font-size: clamp(27px, 4vw, 38px);
-          line-height: 1.04;
-          letter-spacing: -.045em;
-        }
-        .ev-enquiry-modal-head p {
-          margin: 9px 0 0;
-          max-width: 520px;
-          color: #63748f;
-          font-size: 13px;
-          line-height: 1.55;
+        .ev-enquiry-banner {
+          width: 100%;
+          display: block;
+          aspect-ratio: 3 / 1;
+          object-fit: cover;
+          object-position: center;
         }
         .ev-enquiry-close {
-          width: 42px;
-          height: 42px;
-          flex: 0 0 auto;
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          width: 40px;
+          height: 40px;
           display: grid;
           place-items: center;
-          border: 1px solid rgba(9, 48, 98, .10);
-          border-radius: 12px;
-          background: #f7faff;
-          color: #162d53;
+          border: 1px solid rgba(255,255,255,.58);
+          border-radius: 50%;
+          background: rgba(3, 18, 39, .58);
+          color: #fff;
           font-size: 28px;
           line-height: 1;
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
+          box-shadow: 0 8px 20px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.17);
         }
-        .ev-enquiry-close:active { transform: scale(.96); opacity: .70; }
-        .ev-enquiry-form { margin: 0; }
+        .ev-enquiry-close:active { transform: scale(.95); opacity: .78; }
+        .ev-enquiry-modal-body {
+          padding: 24px 28px 26px;
+          background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
+        }
+        .ev-enquiry-modal-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          margin-bottom: 8px;
+          color: #0b5cbb;
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: .18em;
+          text-transform: uppercase;
+        }
+        .ev-enquiry-modal-label::before {
+          content: '';
+          width: 20px;
+          height: 3px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #0b5cbb, #1d8bff);
+        }
+        .ev-enquiry-modal-title {
+          margin: 0;
+          color: #0a1c3d;
+          font-size: clamp(23px, 4vw, 31px);
+          line-height: 1.04;
+          letter-spacing: -.045em;
+        }
+        .ev-enquiry-modal-subtitle {
+          margin: 8px 0 18px;
+          color: #63748f;
+          font-size: 13px;
+          line-height: 1.55;
+        }
+        .ev-enquiry-form {
+          display: grid;
+          gap: 13px;
+          margin: 0;
+        }
+        .ev-enquiry-form label {
+          display: grid;
+          gap: 7px;
+          color: #223a62;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: .07em;
+          text-transform: uppercase;
+        }
+        .ev-enquiry-form .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1.15fr;
+          gap: 12px;
+        }
         .ev-enquiry-form input,
         .ev-enquiry-form textarea,
-        .ev-enquiry-form select { user-select: text; -webkit-user-select: text; }
+        .ev-enquiry-form select {
+          width: 100%;
+          min-height: 54px;
+          padding: 0 15px;
+          border: 1.5px solid rgba(18, 34, 58, .40);
+          border-radius: 11px;
+          outline: none;
+          background: #fff;
+          color: #172842;
+          font-size: 16px;
+          font-weight: 600;
+          letter-spacing: 0;
+          text-transform: none;
+          user-select: text;
+          -webkit-user-select: text;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.92), 0 2px 7px rgba(8, 33, 73, .03);
+          transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+        }
+        .ev-enquiry-form textarea {
+          min-height: 92px;
+          padding-top: 14px;
+          padding-bottom: 14px;
+          resize: vertical;
+        }
+        .ev-enquiry-form input::placeholder,
+        .ev-enquiry-form textarea::placeholder {
+          color: #7b8799;
+          opacity: 1;
+          font-weight: 500;
+        }
+        .ev-enquiry-form input:focus,
+        .ev-enquiry-form textarea:focus,
+        .ev-enquiry-form select:focus {
+          border-color: #1769d2;
+          box-shadow: 0 0 0 3px rgba(23, 105, 210, .10), inset 0 1px 0 rgba(255,255,255,.95);
+        }
+        .ev-enquiry-form > .btn,
+        .ev-enquiry-form button[type='submit'] {
+          width: 100%;
+          min-height: 56px;
+          margin-top: 2px;
+          border-radius: 12px;
+          background: linear-gradient(145deg, #0c4a85 0%, #063665 55%, #052d59 100%);
+          box-shadow: 0 10px 20px rgba(5, 48, 93, .22), inset 0 1px 0 rgba(255,255,255,.16), inset 0 -3px 0 rgba(0,0,0,.15);
+          color: #fff;
+          font-size: 16px;
+          font-weight: 900;
+          letter-spacing: .01em;
+        }
+        .ev-enquiry-form > .btn:active,
+        .ev-enquiry-form button[type='submit']:active { transform: translateY(2px); opacity: .82; }
+        .ev-enquiry-form .form-note { font-size: 11px; line-height: 1.45; }
         @media (max-width: 560px) {
-          .ev-enquiry-overlay { padding: 10px; align-items: end; }
-          .ev-enquiry-modal { max-height: 92vh; border-radius: 22px 22px 0 0; padding: 18px; }
-          .ev-enquiry-modal-head { margin-bottom: 13px; }
+          .ev-enquiry-overlay { padding: 8px; }
+          .ev-enquiry-modal { width: 100%; max-height: 94vh; border-radius: 21px; }
+          .ev-enquiry-banner-wrap { border-radius: 21px 21px 0 0; }
+          .ev-enquiry-close { top: 8px; right: 8px; width: 38px; height: 38px; font-size: 25px; }
+          .ev-enquiry-modal-body { padding: 18px 15px 20px; }
+          .ev-enquiry-form .form-row { grid-template-columns: 1fr; gap: 13px; }
+          .ev-enquiry-form input,
+          .ev-enquiry-form textarea,
+          .ev-enquiry-form select { min-height: 52px; font-size: 15.5px; }
         }
       `}</style>
 
@@ -1643,14 +1745,18 @@ export default function Home() {
           }}
         >
           <div className="ev-enquiry-modal">
-            <div className="ev-enquiry-modal-head">
-              <div>
-                <div className="ev-enquiry-modal-kicker">ADMISSION ENQUIRY</div>
-                <h2>Register your interest</h2>
-                <p>Fill in the details and the EZEE VISION CHAMPUA team can contact you.</p>
-              </div>
+            <div className="ev-enquiry-banner-wrap">
+              <img
+                className="ev-enquiry-banner"
+                src="/enquiry-banner.png"
+                alt="EZEE VISION CHAMPUA admission banner"
+              />
               <button type="button" className="ev-enquiry-close" onClick={() => setEnquiryModalOpen(false)} aria-label="Close admission enquiry">×</button>
             </div>
+            <div className="ev-enquiry-modal-body">
+              <div className="ev-enquiry-modal-label">Admission Enquiry</div>
+              <h2 className="ev-enquiry-modal-title">Join EZEE VISION CHAMPUA</h2>
+              <p className="ev-enquiry-modal-subtitle">Share your details and our coaching team will contact you regarding classes, batches and admission information.</p>
             <form className="enquiry-form ev-enquiry-form" onSubmit={async (e) => {
               e.preventDefault();
               if (enquiryState.busy) return;
@@ -1701,6 +1807,7 @@ export default function Home() {
               <button className="btn btn-primary btn-lg" type="submit" disabled={enquiryState.busy}>{enquiryState.busy ? 'Submitting…' : <>Submit Enquiry <span>→</span></>}</button>
               <small className="form-note">Your details are used only to respond to this admission enquiry.</small>
             </form>
+            </div>
           </div>
         </div>
       ) : null}
