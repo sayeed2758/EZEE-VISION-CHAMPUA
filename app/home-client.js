@@ -108,6 +108,8 @@ function withNormalizedContacts(current, incoming = {}) {
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
   const [profile, setProfile] = useState({
     brandName: 'EZEE VISION CHAMPUA', shortName: 'EZEE VISION', locationLabel: 'CHAMPUA',
     tagline: 'Quality Education. Personal Attention. Better Learning.',
@@ -145,6 +147,51 @@ export default function Home() {
 
     return () => window.clearInterval(timer);
   }, [galleryPaused, publishedGallery.length]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    let mounted = true;
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
+    const captureInstallPrompt = (event) => {
+      event.preventDefault();
+      if (mounted) setInstallPrompt(event);
+    };
+
+    const handleInstalled = () => {
+      if (mounted) setInstallPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', captureInstallPrompt);
+    window.addEventListener('appinstalled', handleInstalled);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener('beforeinstallprompt', captureInstallPrompt);
+      window.removeEventListener('appinstalled', handleInstalled);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = enquiryModalOpen ? 'hidden' : previous;
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [enquiryModalOpen]);
+
+  useEffect(() => {
+    if (!enquiryModalOpen || typeof window === 'undefined') return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setEnquiryModalOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [enquiryModalOpen]);
 
   useEffect(() => {
     if (!firebaseConfigured || !db) return;
@@ -285,6 +332,29 @@ export default function Home() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const openAdmission = () => {
+    setMenuOpen(false);
+    setEnquiryModalOpen(true);
+  };
+
+  const handleInstallApp = async () => {
+    if (installPrompt) {
+      try {
+        installPrompt.prompt();
+        await installPrompt.userChoice;
+      } catch (error) {
+        console.warn('Install prompt failed:', error);
+      } finally {
+        setInstallPrompt(null);
+      }
+      return;
+    }
+
+    if (typeof window !== 'undefined') {
+      window.alert('App install is not available from this browser right now. Open your browser menu and choose “Add to Home screen” or “Install app”.');
+    }
+  };
+
   const schemaNumbers = profile.contactPhones || [profile.phone];
   const organizationSchema = {
     '@context': 'https://schema.org',
@@ -298,38 +368,396 @@ export default function Home() {
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
-      <header className="site-header">
-        <div className="shell nav-wrap">
-          <button className="brand" onClick={() => goTo('home')} aria-label="Go to home">
-            <span className="brand-mark">EV</span>
-            <span className="brand-copy">
-              <strong>{profile.shortName}</strong>
-              <small>{profile.locationLabel}</small>
-            </span>
-          </button>
+      <style>{`
+        html, body { touch-action: manipulation; }
+        body, body * { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+        input, textarea, select, [contenteditable="true"] { user-select: text; -webkit-user-select: text; -webkit-touch-callout: default; }
+        .ev-site-chrome,
+        .ev-site-chrome * {
+          -webkit-tap-highlight-color: transparent;
+        }
+        .ev-topbar {
+          position: relative;
+          z-index: 40;
+          background: linear-gradient(135deg, #073b8f 0%, #0b4cae 52%, #0a3b86 100%);
+          color: #fff;
+          box-shadow: 0 10px 30px rgba(3, 27, 73, .16);
+        }
+        .ev-topbar-inner {
+          max-width: 1240px;
+          margin: 0 auto;
+          min-height: 68px;
+          padding: 10px 22px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+        }
+        .ev-phone-list {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 10px 18px;
+          min-width: 0;
+        }
+        .ev-phone-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          color: #fff;
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: .01em;
+          white-space: nowrap;
+          transition: opacity .18s ease, transform .18s ease;
+        }
+        .ev-phone-link::before {
+          content: '☎';
+          display: grid;
+          place-items: center;
+          width: 25px;
+          height: 25px;
+          border-radius: 50%;
+          color: #ffd54a;
+          background: rgba(255,255,255,.08);
+          font-size: 13px;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
+        }
+        .ev-phone-link:hover { opacity: .86; }
+        .ev-phone-link:active { transform: translateY(1px); opacity: .72; }
+        .ev-download-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          min-width: 174px;
+          min-height: 46px;
+          padding: 0 19px;
+          border: 1px solid rgba(255,255,255,.20);
+          border-radius: 13px;
+          background: linear-gradient(145deg, #18a90f 0%, #07870c 100%);
+          color: #fff;
+          font-size: 14px;
+          font-weight: 900;
+          letter-spacing: .02em;
+          cursor: pointer;
+          box-shadow: 0 8px 16px rgba(2, 66, 2, .24), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -3px 0 rgba(0,0,0,.10);
+          transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+        }
+        .ev-download-btn .ev-download-icon { font-size: 18px; line-height: 1; }
+        .ev-download-btn:active { transform: translateY(2px) scale(.99); opacity: .82; box-shadow: 0 4px 10px rgba(2,66,2,.20), inset 0 1px 0 rgba(255,255,255,.16); }
+        .ev-main-header {
+          position: sticky;
+          top: 0;
+          z-index: 35;
+          background: rgba(255,255,255,.97);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          border-bottom: 1px solid rgba(8, 43, 91, .08);
+          box-shadow: 0 10px 30px rgba(13, 41, 83, .08);
+        }
+        .ev-main-header-inner {
+          max-width: 1240px;
+          margin: 0 auto;
+          min-height: 84px;
+          padding: 12px 22px;
+          display: flex;
+          align-items: center;
+          gap: 18px;
+        }
+        .ev-brand {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          min-width: 0;
+          flex: 1 1 auto;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          cursor: pointer;
+          text-align: left;
+        }
+        .ev-brand-mark {
+          position: relative;
+          flex: 0 0 auto;
+          width: 58px;
+          height: 58px;
+          display: grid;
+          place-items: center;
+          border-radius: 17px;
+          background: linear-gradient(145deg, #0c55bb 0%, #093c8d 58%, #062e70 100%);
+          color: #fff;
+          font-size: 20px;
+          font-weight: 950;
+          letter-spacing: -.07em;
+          box-shadow: 0 10px 22px rgba(6, 58, 142, .22), inset 0 2px 0 rgba(255,255,255,.25), inset 0 -4px 0 rgba(0,0,0,.12);
+        }
+        .ev-brand-mark::after {
+          content: '';
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          right: 7px;
+          top: 7px;
+          border-radius: 50%;
+          background: #ffd447;
+          box-shadow: 0 2px 6px rgba(0,0,0,.18);
+        }
+        .ev-brand-copy { min-width: 0; }
+        .ev-brand-copy strong {
+          display: block;
+          color: #081a39;
+          font-size: clamp(20px, 2.4vw, 28px);
+          line-height: 1;
+          letter-spacing: -.055em;
+          text-transform: uppercase;
+        }
+        .ev-brand-copy small {
+          display: block;
+          margin-top: 5px;
+          color: #52709d;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: .22em;
+          text-transform: uppercase;
+        }
+        .ev-register-btn {
+          flex: 0 0 auto;
+          min-height: 48px;
+          padding: 0 25px;
+          border: 1px solid rgba(0, 111, 0, .13);
+          border-radius: 999px;
+          background: linear-gradient(145deg, #15b31a 0%, #079c0e 52%, #07860b 100%);
+          color: #fff;
+          font-size: 13px;
+          font-weight: 950;
+          letter-spacing: .13em;
+          text-transform: uppercase;
+          box-shadow: 0 10px 20px rgba(7, 133, 13, .19), inset 0 2px 0 rgba(255,255,255,.20), inset 0 -3px 0 rgba(0,0,0,.10);
+          cursor: pointer;
+          transition: transform .16s ease, opacity .16s ease;
+        }
+        .ev-register-btn:active { transform: translateY(2px) scale(.99); opacity: .78; }
+        .ev-menu-btn {
+          flex: 0 0 auto;
+          width: 52px;
+          height: 52px;
+          display: grid;
+          place-items: center;
+          gap: 5px;
+          padding: 13px;
+          border: 0;
+          border-radius: 14px;
+          background: rgba(7, 44, 93, .045);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 6px 18px rgba(20, 55, 93, .08);
+          cursor: pointer;
+          transition: transform .16s ease, background .16s ease, opacity .16s ease;
+        }
+        .ev-menu-btn span {
+          display: block;
+          width: 25px;
+          height: 3px;
+          border-radius: 99px;
+          background: #0a1630;
+        }
+        .ev-menu-btn:active { transform: scale(.96); opacity: .72; background: rgba(7,44,93,.08); }
+        .ev-menu {
+          max-width: 1240px;
+          margin: 0 auto;
+          padding: 0 22px 14px;
+        }
+        .ev-menu-panel {
+          display: grid;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          gap: 8px;
+          padding: 10px;
+          border: 1px solid rgba(9, 50, 104, .09);
+          border-radius: 18px;
+          background: #fff;
+          box-shadow: 0 18px 34px rgba(10, 38, 79, .10);
+        }
+        .ev-menu-panel button {
+          min-height: 44px;
+          border: 0;
+          border-radius: 11px;
+          background: transparent;
+          color: #0c2247;
+          font-size: 13px;
+          font-weight: 800;
+          cursor: pointer;
+          transition: background .16s ease, transform .16s ease, opacity .16s ease;
+        }
+        .ev-menu-panel button:hover { background: #eef5ff; }
+        .ev-menu-panel button:active { transform: translateY(1px); opacity: .70; }
+        @media (max-width: 900px) {
+          .ev-topbar-inner, .ev-main-header-inner { padding-left: 16px; padding-right: 16px; }
+          .ev-menu-panel { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+          .ev-download-btn { min-width: 148px; }
+        }
+        @media (max-width: 660px) {
+          .ev-topbar-inner { min-height: 74px; align-items: stretch; }
+          .ev-phone-list { gap: 6px 12px; align-content: center; }
+          .ev-phone-link { font-size: 11px; }
+          .ev-phone-link::before { width: 20px; height: 20px; font-size: 10px; }
+          .ev-download-btn { min-width: 126px; min-height: 44px; padding: 0 12px; font-size: 11px; border-radius: 12px; }
+          .ev-download-btn .ev-download-icon { font-size: 15px; }
+          .ev-main-header-inner { min-height: 72px; gap: 9px; }
+          .ev-brand-mark { width: 46px; height: 46px; border-radius: 14px; font-size: 16px; }
+          .ev-brand-copy strong { font-size: 16px; }
+          .ev-brand-copy small { font-size: 8px; margin-top: 4px; letter-spacing: .18em; }
+          .ev-register-btn { min-height: 42px; padding: 0 14px; font-size: 10px; letter-spacing: .10em; }
+          .ev-menu-btn { width: 44px; height: 44px; padding: 10px; border-radius: 12px; }
+          .ev-menu-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 430px) {
+          .ev-topbar-inner { padding: 8px 11px; gap: 9px; }
+          .ev-phone-list { max-width: calc(100% - 126px); }
+          .ev-phone-link { font-size: 9px; gap: 4px; }
+          .ev-phone-link:nth-child(3) { width: 100%; }
+          .ev-download-btn { min-width: 116px; padding: 0 9px; font-size: 10px; }
+          .ev-main-header-inner { padding: 9px 11px; }
+          .ev-brand-copy small { letter-spacing: .12em; }
+          .ev-register-btn { padding: 0 10px; font-size: 9px; }
+        }
+      `}</style>
 
-          <nav className={menuOpen ? 'nav-links open' : 'nav-links'} aria-label="Primary navigation">
-            {[
-              ['about', 'About'],
-              ['classes', 'Classes'],
-              ['faculty', 'Faculty'],
-              ['results', 'Results'],
-              ['gallery', 'Gallery'],
-              ['contact', 'Contact']
-            ].map(([id, label]) => (
-              <button key={id} onClick={() => goTo(id)}>{label}</button>
-            ))}
-          </nav>
+      <style>{`
+        .ev-enquiry-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 100;
+          display: grid;
+          place-items: center;
+          padding: 18px;
+          background: rgba(3, 16, 36, .64);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+        }
+        .ev-enquiry-modal {
+          width: min(680px, 100%);
+          max-height: min(88vh, 820px);
+          overflow: auto;
+          border: 1px solid rgba(12, 66, 130, .14);
+          border-radius: 26px;
+          background: #fff;
+          box-shadow: 0 35px 90px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.8);
+          padding: 24px;
+        }
+        .ev-enquiry-modal-head {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 18px;
+          margin-bottom: 18px;
+        }
+        .ev-enquiry-modal-kicker {
+          margin-bottom: 8px;
+          color: #0b5cbb;
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: .19em;
+        }
+        .ev-enquiry-modal h2 {
+          margin: 0;
+          color: #0a1c3d;
+          font-size: clamp(27px, 4vw, 38px);
+          line-height: 1.04;
+          letter-spacing: -.045em;
+        }
+        .ev-enquiry-modal-head p {
+          margin: 9px 0 0;
+          max-width: 520px;
+          color: #63748f;
+          font-size: 13px;
+          line-height: 1.55;
+        }
+        .ev-enquiry-close {
+          width: 42px;
+          height: 42px;
+          flex: 0 0 auto;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(9, 48, 98, .10);
+          border-radius: 12px;
+          background: #f7faff;
+          color: #162d53;
+          font-size: 28px;
+          line-height: 1;
+          cursor: pointer;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .ev-enquiry-close:active { transform: scale(.96); opacity: .70; }
+        .ev-enquiry-form { margin: 0; }
+        .ev-enquiry-form input,
+        .ev-enquiry-form textarea,
+        .ev-enquiry-form select { user-select: text; -webkit-user-select: text; }
+        @media (max-width: 560px) {
+          .ev-enquiry-overlay { padding: 10px; align-items: end; }
+          .ev-enquiry-modal { max-height: 92vh; border-radius: 22px 22px 0 0; padding: 18px; }
+          .ev-enquiry-modal-head { margin-bottom: 13px; }
+        }
+      `}</style>
 
-          <div className="nav-actions">
-            <a className="btn btn-outline desktop-cta" href={`https://wa.me/${String((profile.whatsappNumbers || [profile.whatsapp])[0] || '').replace(/\D/g, '')}`} target="_blank" rel="noreferrer">WhatsApp</a>
-            <button className="btn btn-primary desktop-cta" onClick={() => goTo('admission')}>Admission Enquiry</button>
-            <button className="menu-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="Toggle menu" aria-expanded={menuOpen}>
-              <span></span><span></span><span></span>
+      <div className="ev-site-chrome">
+        <div className="ev-topbar">
+          <div className="ev-topbar-inner">
+            <div className="ev-phone-list" aria-label="EZEE VISION CHAMPUA contact numbers">
+              {(profile.contactPhones || DEFAULT_CONTACT_NUMBERS).map((number, index) => (
+                <a
+                  key={`${number}-${index}`}
+                  className="ev-phone-link"
+                  href={`tel:${String(number).replace(/[^0-9+]/g, '')}`}
+                  aria-label={`Call EZEE VISION CHAMPUA ${number}`}
+                >
+                  {number}
+                </a>
+              ))}
+            </div>
+            <button className="ev-download-btn" type="button" onClick={handleInstallApp}>
+              <span className="ev-download-icon">⬇</span>
+              <span>Download App</span>
             </button>
           </div>
         </div>
-      </header>
+
+        <header className="ev-main-header">
+          <div className="ev-main-header-inner">
+            <button className="ev-brand" onClick={() => goTo('home')} aria-label="Go to EZEE VISION CHAMPUA home">
+              <span className="ev-brand-mark">EV</span>
+              <span className="ev-brand-copy">
+                <strong>EZEE VISION CHAMPUA</strong>
+                <small>{profile.tagline || 'Quality Education · Personal Attention'}</small>
+              </span>
+            </button>
+
+            <button className="ev-register-btn" onClick={openAdmission} type="button">
+              Register Now
+            </button>
+
+            <button className="ev-menu-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="Toggle navigation menu" aria-expanded={menuOpen} type="button">
+              <span></span><span></span><span></span>
+            </button>
+          </div>
+          {menuOpen ? (
+            <div className="ev-menu">
+              <nav className="ev-menu-panel" aria-label="Primary navigation">
+                {[
+                  ['home', 'Home'],
+                  ['about', 'About'],
+                  ['classes', 'Classes'],
+                  ['faculty', 'Faculty'],
+                  ['results', 'Results'],
+                  ['gallery', 'Gallery'],
+                  ['contact', 'Contact']
+                ].map(([id, label]) => (
+                  <button key={id} onClick={() => goTo(id)} type="button">{label}</button>
+                ))}
+              </nav>
+            </div>
+          ) : null}
+        </header>
+      </div>
 
       <section id="home" className="hero section-anchor">
         <div className="hero-glow glow-a"></div>
@@ -342,7 +770,7 @@ export default function Home() {
               {profile.heroText}
             </p>
             <div className="hero-actions">
-              <button className="btn btn-primary btn-lg" onClick={() => goTo('admission')}>Get Admission Info <span>→</span></button>
+              <button className="btn btn-primary btn-lg" onClick={openAdmission}>Get Admission Info <span>→</span></button>
               <button className="btn btn-ghost btn-lg" onClick={() => goTo('classes')}>Explore Classes <span>↘</span></button>
             </div>
             <div className="hero-note">
@@ -1060,7 +1488,7 @@ export default function Home() {
           <div className="updates-grid">
             {publishedUpdates.map((item) => (
               <article className="update-card" key={item.id || item.title}>
-                <span>{item.label}</span><h3>{item.title}</h3><p>{item.text}</p><button onClick={() => goTo('admission')}>Know more →</button>
+                <span>{item.label}</span><h3>{item.title}</h3><p>{item.text}</p><button onClick={openAdmission}>Know more →</button>
               </article>
             ))}
           </div>
@@ -1184,6 +1612,79 @@ export default function Home() {
         <a href={`https://wa.me/${String((profile.whatsappNumbers || profile.contactPhones || [profile.whatsapp])[0] || '').replace(/\D/g, '')}`} target="_blank" rel="noreferrer">◉ <span>WhatsApp</span></a>
         <button onClick={() => goTo('contact')}>⌖ <span>All Contacts</span></button>
       </div>
+
+      {enquiryModalOpen ? (
+        <div
+          className="ev-enquiry-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Admission enquiry form"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setEnquiryModalOpen(false);
+          }}
+        >
+          <div className="ev-enquiry-modal">
+            <div className="ev-enquiry-modal-head">
+              <div>
+                <div className="ev-enquiry-modal-kicker">ADMISSION ENQUIRY</div>
+                <h2>Register your interest</h2>
+                <p>Fill in the details and the EZEE VISION CHAMPUA team can contact you.</p>
+              </div>
+              <button type="button" className="ev-enquiry-close" onClick={() => setEnquiryModalOpen(false)} aria-label="Close admission enquiry">×</button>
+            </div>
+            <form className="enquiry-form ev-enquiry-form" onSubmit={async (e) => {
+              e.preventDefault();
+              if (enquiryState.busy) return;
+              if (enquiryForm.website) return;
+              const studentName = enquiryForm.studentName.trim();
+              const parentName = enquiryForm.parentName.trim();
+              const className = enquiryForm.className.trim();
+              const phone = enquiryForm.phone.trim();
+              const message = enquiryForm.message.trim();
+              if (!studentName || !parentName || !className || !phone) {
+                setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parent / Guardian Name, Class and Phone.' });
+                return;
+              }
+              if (!/^[0-9+()\-\s]{10,18}$/.test(phone)) {
+                setEnquiryState({ busy: false, type: 'error', text: 'Please enter a valid phone number.' });
+                return;
+              }
+              if (!firebaseConfigured || !db) {
+                setEnquiryState({ busy: false, type: 'error', text: 'Enquiry service is temporarily unavailable. Please call or WhatsApp us.' });
+                return;
+              }
+              setEnquiryState({ busy: true, type: '', text: '' });
+              try {
+                await addDoc(collection(db, 'enquiries'), {
+                  studentName,
+                  parentName,
+                  className,
+                  phone,
+                  message,
+                  createdAt: serverTimestamp(),
+                  source: 'website-header',
+                  status: 'new'
+                });
+                setEnquiryForm({ studentName: '', parentName: '', className: '', phone: '', message: '', website: '' });
+                setEnquiryState({ busy: false, type: 'success', text: 'Thank you. Your admission enquiry has been received.' });
+              } catch (error) {
+                setEnquiryState({ busy: false, type: 'error', text: error?.message || 'Unable to submit your enquiry right now. Please use Call or WhatsApp.' });
+              }
+            }} noValidate>
+              <label>Student Name<input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Enter student name" autoComplete="name" /></label>
+              <label>Parent / Guardian Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parent or guardian name" autoComplete="name" /></label>
+              <div className="form-row">
+                <label>Class<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>Select class</option>{['4','5','6','7','8','9','10','11','12'].map((c) => <option key={c}>{c}</option>)}</select></label>
+                <label>Phone<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
+              </div>
+              <label>Message<textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Tell us what you would like to know..."></textarea></label>
+              {enquiryState.text ? <div className={enquiryState.type === 'error' ? 'form-note form-note-error' : 'form-note form-note-success'} role="status">{enquiryState.text}</div> : null}
+              <button className="btn btn-primary btn-lg" type="submit" disabled={enquiryState.busy}>{enquiryState.busy ? 'Submitting…' : <>Submit Enquiry <span>→</span></>}</button>
+              <small className="form-note">Your details are used only to respond to this admission enquiry.</small>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
