@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db, firebaseConfigured } from '../lib/firebase';
 
 const classGroups = [
   {
@@ -64,6 +66,28 @@ const updates = [
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profile, setProfile] = useState({
+    brandName: 'EZEE VISION CHAMPUA', shortName: 'EZEE VISION', locationLabel: 'CHAMPUA',
+    tagline: 'Quality Education. Personal Attention. Better Learning.',
+    heroTitleLine1: 'Learn better.', heroTitleLine2: 'Grow stronger.',
+    heroText: 'A focused learning environment built around concept clarity, regular practice and personal attention.',
+    studentCount: '150', journeyMonths: '5', classRange: '4–12',
+    classSupportText: 'Coaching for Classes 4–12',
+    aboutTitle: 'A growing coaching community with a clear purpose.',
+    aboutParagraph1: 'EZEE VISION CHAMPUA was started with a simple idea: create a focused, student-centred learning environment where students can understand concepts, practise regularly and move forward with confidence.',
+    aboutParagraph2: 'In its first five months, the coaching community has grown to nearly 150 students. The next chapter is about building the same consistency at a larger scale — without losing the personal attention that makes learning meaningful.',
+    phone: '+91 99999 99999', whatsapp: '919999999999', email: '', address: 'Champua, Odisha', mapUrl: '',
+    facebook: '', instagram: '', youtube: '', telegram: '', footerTagline: 'Quality Education. Personal Attention. Better Learning.'
+  });
+
+  useEffect(() => {
+    if (!firebaseConfigured || !db) return;
+    getDoc(doc(db, 'siteContent', 'profile')).then((snapshot) => {
+      if (snapshot.exists()) {
+        setProfile((current) => ({ ...current, ...snapshot.data() }));
+      }
+    }).catch(() => {});
+  }, []);
 
   const goTo = (id) => {
     setMenuOpen(false);
@@ -77,8 +101,8 @@ export default function Home() {
           <button className="brand" onClick={() => goTo('home')} aria-label="Go to home">
             <span className="brand-mark">EV</span>
             <span className="brand-copy">
-              <strong>EZEE VISION</strong>
-              <small>CHAMPUA</small>
+              <strong>{profile.shortName}</strong>
+              <small>{profile.locationLabel}</small>
             </span>
           </button>
 
@@ -96,7 +120,7 @@ export default function Home() {
           </nav>
 
           <div className="nav-actions">
-            <a className="btn btn-outline desktop-cta" href="https://wa.me/919999999999" target="_blank" rel="noreferrer">WhatsApp</a>
+            <a className="btn btn-outline desktop-cta" href={`https://wa.me/${String(profile.whatsapp).replace(/\D/g, '')}`} target="_blank" rel="noreferrer">WhatsApp</a>
             <button className="btn btn-primary desktop-cta" onClick={() => goTo('admission')}>Admission Enquiry</button>
             <button className="menu-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="Toggle menu" aria-expanded={menuOpen}>
               <span></span><span></span><span></span>
@@ -110,10 +134,10 @@ export default function Home() {
         <div className="hero-glow glow-b"></div>
         <div className="shell hero-grid">
           <div className="hero-copy">
-            <div className="eyebrow"><span className="dot"></span> COACHING FOR CLASSES 4–12</div>
-            <h1>Learn better.<br /><span>Grow stronger.</span></h1>
+            <div className="eyebrow"><span className="dot"></span> {profile.classSupportText}</div>
+            <h1>{profile.heroTitleLine1}<br /><span>{profile.heroTitleLine2}</span></h1>
             <p className="hero-text">
-              A focused learning environment built around <b>concept clarity, regular practice and personal attention.</b>
+              {profile.heroText}
             </p>
             <div className="hero-actions">
               <button className="btn btn-primary btn-lg" onClick={() => goTo('admission')}>Get Admission Info <span>→</span></button>
@@ -121,14 +145,14 @@ export default function Home() {
             </div>
             <div className="hero-note">
               <span className="mini-people"><i>4</i><i>1</i><i>2</i></span>
-              <span><b>Nearly 150 students</b> have joined the journey in the first 5 months.</span>
+              <span><b>Nearly {profile.studentCount} students</b> have joined the journey in the first {profile.journeyMonths} months.</span>
             </div>
           </div>
 
           <div className="hero-visual" aria-label="EZEE VISION CHAMPUA learning visual">
             <div className="visual-card visual-main">
               <div className="visual-top">
-                <span>EZEE VISION CHAMPUA</span>
+                <span>{profile.brandName}</span>
                 <span className="status-pill">LEARN • PRACTISE • GROW</span>
               </div>
               <div className="visual-content">
@@ -140,13 +164,13 @@ export default function Home() {
                 <div className="figure-wrap">
                   <div className="figure-head"></div>
                   <div className="figure-body"></div>
-                  <div className="figure-card">4–12</div>
+                  <div className="figure-card">{profile.classRange}</div>
                 </div>
               </div>
-              <div className="visual-footer"><span>Student-focused coaching</span><span>Champua</span></div>
+              <div className="visual-footer"><span>Student-focused coaching</span><span>{profile.locationLabel}</span></div>
             </div>
-            <div className="floating-stat stat-one"><b>150</b><span>students</span></div>
-            <div className="floating-stat stat-two"><b>5 mo.</b><span>journey</span></div>
+            <div className="floating-stat stat-one"><b>{profile.studentCount}</b><span>students</span></div>
+            <div className="floating-stat stat-two"><b>{profile.journeyMonths} mo.</b><span>journey</span></div>
             <div className="floating-chip">FOCUSED LEARNING</div>
           </div>
         </div>
@@ -154,9 +178,9 @@ export default function Home() {
 
       <section className="trust-strip">
         <div className="shell trust-grid">
-          <div><strong>5 Months</strong><span>of focused growth</span></div>
-          <div><strong>~150</strong><span>students joined</span></div>
-          <div><strong>4–12</strong><span>classes supported</span></div>
+          <div><strong>{profile.journeyMonths} Months</strong><span>of focused growth</span></div>
+          <div><strong>~{profile.studentCount}</strong><span>students joined</span></div>
+          <div><strong>{profile.classRange}</strong><span>classes supported</span></div>
           <div><strong>Student-first</strong><span>learning approach</span></div>
         </div>
       </section>
@@ -165,14 +189,14 @@ export default function Home() {
         <div className="shell two-col">
           <div>
             <div className="section-kicker">ABOUT EZEE VISION</div>
-            <h2>A growing coaching community with a clear purpose.</h2>
+            <h2>{profile.aboutTitle}</h2>
           </div>
           <div className="section-copy">
             <p>
-              EZEE VISION CHAMPUA was started with a simple idea: create a focused, student-centred learning environment where students can understand concepts, practise regularly and move forward with confidence.
+              {profile.aboutParagraph1}
             </p>
             <p>
-              In its first five months, the coaching community has grown to nearly 150 students. The next chapter is about building the same consistency at a larger scale — without losing the personal attention that makes learning meaningful.
+              {profile.aboutParagraph2}
             </p>
           </div>
         </div>
@@ -180,7 +204,7 @@ export default function Home() {
         <div className="shell journey">
           <div className="journey-line"></div>
           <div className="journey-item"><span>01</span><b>Started</b><p>A clear vision for student-focused learning.</p></div>
-          <div className="journey-item highlight"><span>02</span><b>5 Months</b><p>Nearly 150 students in the growing community.</p></div>
+          <div className="journey-item highlight"><span>02</span><b>{profile.journeyMonths} Months</b><p>Nearly {profile.studentCount} students in the growing community.</p></div>
           <div className="journey-item"><span>03</span><b>Next Chapter</b><p>More learning resources, stronger systems and wider reach.</p></div>
         </div>
       </section>
@@ -331,8 +355,8 @@ export default function Home() {
             <h2>Let’s talk about the right learning plan.</h2>
             <p>Share a few details and the coaching team can guide you regarding classes, subjects and batch information.</p>
             <div className="quick-contact">
-              <a href="tel:+919999999999"><span>Call</span><b>+91 99999 99999</b></a>
-              <a href="https://wa.me/919999999999" target="_blank" rel="noreferrer"><span>WhatsApp</span><b>Chat with EZEE VISION</b></a>
+              <a href={`tel:${profile.phone.replace(/[^0-9+]/g, '')}`}><span>Call</span><b>{profile.phone}</b></a>
+              <a href={`https://wa.me/${String(profile.whatsapp).replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><span>WhatsApp</span><b>Chat with EZEE VISION</b></a>
             </div>
           </div>
           <form className="enquiry-form" onSubmit={(e) => e.preventDefault()}>
@@ -358,26 +382,26 @@ export default function Home() {
             <p>Keep your address, phone, WhatsApp and map location updated here so parents can reach the coaching easily.</p>
           </div>
           <div className="contact-card">
-            <div><span>COACHING</span><b>EZEE VISION CHAMPUA</b></div>
-            <div><span>LOCATION</span><b>Champua, Odisha</b></div>
-            <div><span>PHONE</span><b>+91 99999 99999</b></div>
-            <div className="map-placeholder"><span>GOOGLE MAPS</span><b>Map integration ready for Phase 2</b></div>
+            <div><span>COACHING</span><b>{profile.brandName}</b></div>
+            <div><span>LOCATION</span><b>{profile.address}</b></div>
+            <div><span>PHONE</span><b>{profile.phone}</b></div>
+            <div className="map-placeholder"><span>GOOGLE MAPS</span>{profile.mapUrl ? <a href={profile.mapUrl} target="_blank" rel="noreferrer"><b>Open location map →</b></a> : <b>Map link will appear after it is added in Admin.</b>}</div>
           </div>
         </div>
       </section>
 
       <footer className="footer">
         <div className="shell footer-grid">
-          <div><div className="footer-brand">EZEE VISION <span>CHAMPUA</span></div><p>Quality Education. Personal Attention. Better Learning.</p></div>
+          <div><div className="footer-brand">{profile.shortName} <span>{profile.locationLabel}</span></div><p>{profile.footerTagline}</p></div>
           <div className="footer-links"><button onClick={() => goTo('about')}>About</button><button onClick={() => goTo('classes')}>Classes</button><button onClick={() => goTo('faculty')}>Faculty</button><button onClick={() => goTo('contact')}>Contact</button></div>
-          <div className="footer-social"><a href="https://wa.me/919999999999" target="_blank" rel="noreferrer">WhatsApp</a><a href="#">YouTube</a><a href="#">Instagram</a></div>
+          <div className="footer-social"><a href={`https://wa.me/${String(profile.whatsapp).replace(/\D/g, '')}`} target="_blank" rel="noreferrer">WhatsApp</a>{profile.youtube ? <a href={profile.youtube} target="_blank" rel="noreferrer">YouTube</a> : null}{profile.instagram ? <a href={profile.instagram} target="_blank" rel="noreferrer">Instagram</a> : null}</div>
         </div>
-        <div className="shell footer-bottom"><span>© 2026 EZEE VISION CHAMPUA. All rights reserved.</span><span>Made With ❤️ By Shahid Sir</span></div>
+        <div className="shell footer-bottom"><span>© 2026 {profile.brandName}. All rights reserved.</span><span>Made With ❤️ By Shahid Sir</span></div>
       </footer>
 
       <div className="mobile-bar">
-        <a href="tel:+919999999999">☎ <span>Call</span></a>
-        <a href="https://wa.me/919999999999" target="_blank" rel="noreferrer">◉ <span>WhatsApp</span></a>
+        <a href={`tel:${profile.phone.replace(/[^0-9+]/g, '')}`}>☎ <span>Call</span></a>
+        <a href={`https://wa.me/${String(profile.whatsapp).replace(/\D/g, '')}`} target="_blank" rel="noreferrer">◉ <span>WhatsApp</span></a>
         <button onClick={() => goTo('admission')}>✦ <span>Admission</span></button>
       </div>
     </main>
