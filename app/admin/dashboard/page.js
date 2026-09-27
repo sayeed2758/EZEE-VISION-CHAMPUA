@@ -64,6 +64,12 @@ const moduleRoadmap = [
     label: 'Testimonials',
     description: 'Manage approved student and parent feedback displayed on the public website.',
     phase: '3.9'
+  },
+  {
+    key: 'contact',
+    label: 'Contact & Communication',
+    description: 'Control phone, WhatsApp, email, address, map and social links shown to parents.',
+    phase: '3.10'
   }
 ];
 
@@ -347,6 +353,10 @@ export default function AdminDashboardPage() {
                 ) : module.key === 'testimonials' ? (
                   <button className={styles.openButton} type="button" onClick={() => router.push('/admin/testimonials')}>
                     Open Testimonials Manager →
+                  </button>
+                ) : module.key === 'contact' ? (
+                  <button className={styles.openButton} type="button" onClick={() => router.push('/admin/contact')}>
+                    Open Contact Manager →
                   </button>
                 ) : (
                   <button className={styles.lockedButton} type="button" disabled>
