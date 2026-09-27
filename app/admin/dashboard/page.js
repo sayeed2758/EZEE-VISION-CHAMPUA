@@ -297,7 +297,7 @@ export default function AdminDashboardPage() {
 
           <div className={styles.moduleGrid}>
             {moduleRoadmap.map((module) => (
-              <article className={`${styles.moduleCard} ${module.key === 'profile' ? styles.moduleCardActive : ''}`} key={module.key}>
+              <article className={`${styles.moduleCard} ${['profile', 'updates'].includes(module.key) ? styles.moduleCardActive : ''}`} key={module.key}>
                 <div className={styles.moduleTop}>
                   <span className={styles.moduleIcon}>{module.label.slice(0, 1)}</span>
                   <span className={styles.phaseTag}>NEXT • {module.phase}</span>
@@ -307,6 +307,10 @@ export default function AdminDashboardPage() {
                 {module.key === 'profile' ? (
                   <button className={styles.openButton} type="button" onClick={() => router.push('/admin/coaching-profile')}>
                     Open Coaching Profile →
+                  </button>
+                ) : module.key === 'updates' ? (
+                  <button className={styles.openButton} type="button" onClick={() => router.push('/admin/announcements')}>
+                    Open Announcements →
                   </button>
                 ) : (
                   <button className={styles.lockedButton} type="button" disabled>
