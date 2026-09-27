@@ -93,6 +93,7 @@ export default function Home() {
   const [publishedFaculty, setPublishedFaculty] = useState([]);
   const [publishedClasses, setPublishedClasses] = useState(classGroups);
   const [publishedResults, setPublishedResults] = useState([]);
+  const [publishedTestimonials, setPublishedTestimonials] = useState(testimonials);
   const [enquiryForm, setEnquiryForm] = useState({ studentName: '', parentName: '', className: '', phone: '', message: '', website: '' });
   const [enquiryState, setEnquiryState] = useState({ busy: false, type: '', text: '' });
 
@@ -189,6 +190,24 @@ export default function Home() {
           .slice(0, 12);
 
         setPublishedResults(liveResults);
+      }).catch(() => {})
+,
+      getDocs(collection(db, 'testimonials')).then((snapshot) => {
+        const liveTestimonials = snapshot.docs
+          .map((item) => ({ id: item.id, ...item.data() }))
+          .filter((item) => item.published === true && item.quote)
+          .sort((a, b) => {
+            if (a.featured !== b.featured) return a.featured ? -1 : 1;
+            const orderA = Number(a.sortOrder ?? 9999);
+            const orderB = Number(b.sortOrder ?? 9999);
+            if (orderA !== orderB) return orderA - orderB;
+            return String(a.name || '').localeCompare(String(b.name || ''));
+          })
+          .slice(0, 9);
+
+        if (liveTestimonials.length) {
+          setPublishedTestimonials(liveTestimonials);
+        }
       }).catch(() => {})
     ]);
   }, []);
@@ -693,7 +712,7 @@ export default function Home() {
             </div>
           </div>
           <div className="testimonial-grid">
-            {testimonials.map((item) => (
+            {publishedTestimonials.map((item) => (
               <article className="testimonial-card" key={item.name}>
                 <div className="quote-mark">“</div>
                 <p>{item.quote}</p>
