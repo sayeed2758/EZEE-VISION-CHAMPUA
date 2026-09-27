@@ -1,6 +1,6 @@
 {
   "name": "ezee-vision-champua",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "firebase": "12.19.0",
     "next": "14.2.31",
     "react": "18.3.1",
     "react-dom": "18.3.1"
