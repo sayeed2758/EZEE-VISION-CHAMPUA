@@ -70,6 +70,12 @@ const moduleRoadmap = [
     label: 'Contact & Communication',
     description: 'Control phone, WhatsApp, email, address, map and social links shown to parents.',
     phase: '3.10'
+  },
+  {
+    key: 'seo',
+    label: 'SEO & Search',
+    description: 'Technical SEO, Google-friendly metadata, sitemap, robots and social sharing setup.',
+    phase: '3.11'
   }
 ];
 
@@ -357,6 +363,10 @@ export default function AdminDashboardPage() {
                 ) : module.key === 'contact' ? (
                   <button className={styles.openButton} type="button" onClick={() => router.push('/admin/contact')}>
                     Open Contact Manager →
+                  </button>
+                ) : module.key === 'seo' ? (
+                  <button className={styles.openButton} type="button" onClick={() => router.push('/admin/seo')}>
+                    Open SEO Guide →
                   </button>
                 ) : (
                   <button className={styles.lockedButton} type="button" disabled>
