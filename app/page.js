@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db, firebaseConfigured } from '../lib/firebase';
 
 const classGroups = [
@@ -58,7 +58,7 @@ const testimonials = [
   }
 ];
 
-const updates = [
+const DEFAULT_UPDATES = [
   { label: 'Admissions', title: 'Enquiry open for Classes 4–12', text: 'Contact the team for batch timing and admission information.' },
   { label: 'Academics', title: 'Regular practice and revision', text: 'Structured support to keep learning consistent throughout the session.' },
   { label: 'Community', title: 'Growing student community', text: 'Nearly 150 students have joined the EZEE VISION CHAMPUA journey in the first five months.' }
@@ -79,14 +79,36 @@ export default function Home() {
     phone: '+91 99999 99999', whatsapp: '919999999999', email: '', address: 'Champua, Odisha', mapUrl: '',
     facebook: '', instagram: '', youtube: '', telegram: '', footerTagline: 'Quality Education. Personal Attention. Better Learning.'
   });
+  const [publishedUpdates, setPublishedUpdates] = useState(DEFAULT_UPDATES);
 
   useEffect(() => {
     if (!firebaseConfigured || !db) return;
-    getDoc(doc(db, 'siteContent', 'profile')).then((snapshot) => {
-      if (snapshot.exists()) {
-        setProfile((current) => ({ ...current, ...snapshot.data() }));
-      }
-    }).catch(() => {});
+
+    Promise.all([
+      getDoc(doc(db, 'siteContent', 'profile')).then((snapshot) => {
+        if (snapshot.exists()) {
+          setProfile((current) => ({ ...current, ...snapshot.data() }));
+        }
+      }).catch(() => {}),
+      getDocs(collection(db, 'updates')).then((snapshot) => {
+        const liveUpdates = snapshot.docs
+          .map((item) => ({ id: item.id, ...item.data() }))
+          .filter((item) => item.published === true)
+          .sort((a, b) => {
+            if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+            return String(b.publishDate || '').localeCompare(String(a.publishDate || ''));
+          })
+          .slice(0, 6)
+          .map((item) => ({
+            label: item.category || 'Update',
+            title: item.title || 'EZEE VISION Update',
+            text: item.content || '',
+            id: item.id
+          }));
+
+        setPublishedUpdates(liveUpdates);
+      }).catch(() => {})
+    ]);
   }, []);
 
   const goTo = (id) => {
@@ -339,8 +361,8 @@ export default function Home() {
             <p>Announcements, admission updates, academic notices and important information can live here.</p>
           </div>
           <div className="updates-grid">
-            {updates.map((item) => (
-              <article className="update-card" key={item.title}>
+            {publishedUpdates.map((item) => (
+              <article className="update-card" key={item.id || item.title}>
                 <span>{item.label}</span><h3>{item.title}</h3><p>{item.text}</p><button onClick={() => goTo('admission')}>Know more →</button>
               </article>
             ))}
