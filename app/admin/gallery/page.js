@@ -12,9 +12,8 @@ import {
   serverTimestamp,
   updateDoc,
 } from 'firebase/firestore';
-import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
-import { auth, db, firebaseConfigured, storage } from '../../../lib/firebase';
+import { auth, db, firebaseConfigured } from '../../../lib/firebase';
 import styles from './gallery.module.css';
 
 const EMPTY_FORM = {
@@ -48,7 +47,17 @@ function sortItems(items) {
 }
 
 function cleanFileName(name) {
-  return name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/-+/g, '-').slice(-90);
+  const safe = String(name || 'image.jpg').toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/-+/g, '-');
+  return (safe || 'image.jpg').slice(-90);
+}
+
+async function parseJsonResponse(response) {
+  const text = await response.text();
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch {
+    return { message: text || `Request failed with HTTP ${response.status}` };
+  }
 }
 
 export default function GalleryPage() {
@@ -56,6 +65,7 @@ export default function GalleryPage() {
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [allowed, setAllowed] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [message, setMessage] = useState('');
   const [items, setItems] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -63,6 +73,7 @@ export default function GalleryPage() {
   const [previewUrl, setPreviewUrl] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const loadGallery = useCallback(async () => {
     if (!db) return;
@@ -77,14 +88,16 @@ export default function GalleryPage() {
       return undefined;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (!currentUser) {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
         router.replace('/admin/login');
         return;
       }
 
+      setCurrentUser(user);
+
       try {
-        const adminSnap = await getDoc(doc(db, 'admins', currentUser.uid));
+        const adminSnap = await getDoc(doc(db, 'admins', user.uid));
         const isActiveAdmin = adminSnap.exists() && adminSnap.data()?.active === true;
         if (!isActiveAdmin) {
           router.replace('/admin/login?error=unauthorized');
@@ -121,6 +134,8 @@ export default function GalleryPage() {
     setEditingId(null);
     setForm({ ...EMPTY_FORM, sortOrder: String((items.length + 1) * 10) });
     setSelectedFile(null);
+    setUploadProgress(0);
+    if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
     setPreviewUrl('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
@@ -144,9 +159,19 @@ export default function GalleryPage() {
       return;
     }
 
+    if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
     setSelectedFile(file);
-    setMessage('Image selected. Save the gallery item to upload it.');
+    setUploadProgress(0);
+    setMessage('Image selected. Save the gallery item to upload it to ImageKit.');
     setPreviewUrl(URL.createObjectURL(file));
+  }
+
+  function clearSelectedFile() {
+    setSelectedFile(null);
+    setUploadProgress(0);
+    if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(form.imageUrl || '');
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
   function startEdit(item) {
@@ -161,20 +186,99 @@ export default function GalleryPage() {
       featured: item.featured === true,
     });
     setSelectedFile(null);
+    setUploadProgress(0);
+    if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(item.imageUrl || '');
     if (fileInputRef.current) fileInputRef.current.value = '';
     setMessage('Editing selected gallery item.');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  async function uploadSelectedFile() {
-    if (!selectedFile || !storage) return null;
-    const safeName = cleanFileName(selectedFile.name) || 'image.jpg';
-    const storagePath = `public/gallery/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
-    const storageRef = ref(storage, storagePath);
-    await uploadBytes(storageRef, selectedFile, { contentType: selectedFile.type });
-    const downloadUrl = await getDownloadURL(storageRef);
-    return { downloadUrl, storagePath };
+  async function getImageKitAuth() {
+    if (!currentUser) throw new Error('Your admin session is not ready. Please sign in again.');
+    const idToken = await currentUser.getIdToken();
+    const response = await fetch('/api/imagekit-auth', {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${idToken}` },
+      cache: 'no-store',
+    });
+    const data = await parseJsonResponse(response);
+    if (!response.ok) {
+      throw new Error(data.message || data.error || `Image upload authentication failed (${response.status}).`);
+    }
+    return data;
+  }
+
+  async function uploadToImageKit(file) {
+    const authParams = await getImageKitAuth();
+    const fileName = `${Date.now()}-${cleanFileName(file.name)}`;
+    const folder = '/ezee-vision-champua/gallery';
+
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileName', fileName);
+      formData.append('publicKey', authParams.publicKey);
+      formData.append('signature', authParams.signature);
+      formData.append('expire', String(authParams.expire));
+      formData.append('token', authParams.token);
+      formData.append('folder', folder);
+      formData.append('useUniqueFileName', 'true');
+      formData.append('isPrivateFile', 'false');
+
+      xhr.open('POST', 'https://upload.imagekit.io/api/v1/files/upload');
+      xhr.timeout = 120000;
+      xhr.responseType = 'text';
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          setUploadProgress(Math.round((event.loaded / event.total) * 100));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Image upload failed because the network connection was interrupted.'));
+      xhr.ontimeout = () => reject(new Error('Image upload timed out after 2 minutes. Please try again with a smaller image or a better connection.'));
+      xhr.onabort = () => reject(new Error('Image upload was cancelled.'));
+      xhr.onload = () => {
+        let data = {};
+        try {
+          data = xhr.responseText ? JSON.parse(xhr.responseText) : {};
+        } catch {
+          data = { message: xhr.responseText };
+        }
+
+        if (xhr.status >= 200 && xhr.status < 300 && data.url) {
+          setUploadProgress(100);
+          resolve({
+            imageUrl: data.url,
+            fileId: data.fileId || '',
+            filePath: data.filePath || '',
+          });
+          return;
+        }
+
+        const reason = data.message || data.error?.message || `ImageKit upload failed with HTTP ${xhr.status}.`;
+        reject(new Error(reason));
+      };
+
+      xhr.send(formData);
+    });
+  }
+
+  async function deleteImageKitFile(fileId) {
+    if (!fileId || !currentUser) return;
+    const idToken = await currentUser.getIdToken();
+    const response = await fetch('/api/imagekit-delete', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ fileId }),
+    });
+    const data = await parseJsonResponse(response);
+    if (!response.ok) throw new Error(data.message || data.error || `Image delete failed (${response.status}).`);
   }
 
   async function handleSubmit(event) {
@@ -192,24 +296,28 @@ export default function GalleryPage() {
       setMessage('Add an image by uploading a file or provide an image URL.');
       return;
     }
-    if (selectedFile && !storage) {
-      setMessage('Firebase Storage is not available. Use an image URL or enable the project Storage service first.');
-      return;
-    }
 
     setSaving(true);
+    setUploadProgress(0);
     setMessage('');
 
+    let uploadedNewFile = null;
+
     try {
+      const previous = editingId ? items.find((item) => item.id === editingId) : null;
       let nextImageUrl = imageUrl;
-      let nextStoragePath = editingId ? items.find((item) => item.id === editingId)?.storagePath || '' : '';
-      let uploadedNewFile = false;
+      let nextFileId = previous?.fileId || '';
+      let nextFilePath = previous?.filePath || '';
 
       if (selectedFile) {
-        const uploaded = await uploadSelectedFile();
-        nextImageUrl = uploaded.downloadUrl;
-        nextStoragePath = uploaded.storagePath;
-        uploadedNewFile = true;
+        setMessage('Uploading image to ImageKit…');
+        uploadedNewFile = await uploadToImageKit(selectedFile);
+        nextImageUrl = uploadedNewFile.imageUrl;
+        nextFileId = uploadedNewFile.fileId;
+        nextFilePath = uploadedNewFile.filePath;
+      } else if (!previous || imageUrl !== previous.imageUrl) {
+        nextFileId = '';
+        nextFilePath = '';
       }
 
       const payload = {
@@ -220,19 +328,21 @@ export default function GalleryPage() {
         sortOrder: Number.isFinite(order) ? order : 10,
         published: Boolean(form.published),
         featured: Boolean(form.featured),
-        storagePath: nextStoragePath,
+        provider: selectedFile ? 'imagekit' : (editingId && items.find((item) => item.id === editingId)?.provider || 'external'),
+        fileId: nextFileId,
+        filePath: nextFilePath,
+        storagePath: '',
         updatedAt: serverTimestamp(),
       };
 
       if (editingId) {
-        const previous = items.find((item) => item.id === editingId);
         await updateDoc(doc(db, 'gallery', editingId), payload);
 
-        if (uploadedNewFile && previous?.storagePath && previous.storagePath !== nextStoragePath && storage) {
+        if (previous?.fileId && previous.fileId !== nextFileId) {
           try {
-            await deleteObject(ref(storage, previous.storagePath));
+            await deleteImageKitFile(previous.fileId);
           } catch (error) {
-            console.warn('Old image could not be deleted from Storage:', error);
+            console.warn('Gallery item updated, but the previous ImageKit file could not be deleted:', error);
           }
         }
         setMessage('Gallery item updated successfully.');
@@ -245,7 +355,14 @@ export default function GalleryPage() {
       await loadGallery();
     } catch (error) {
       console.error(error);
-      setMessage('Save failed. Check Firebase Storage/Firestore permissions and try again.');
+      if (uploadedNewFile?.fileId) {
+        try {
+          await deleteImageKitFile(uploadedNewFile.fileId);
+        } catch (cleanupError) {
+          console.warn('Uploaded image cleanup failed:', cleanupError);
+        }
+      }
+      setMessage(error?.message || 'Save failed. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -276,13 +393,15 @@ export default function GalleryPage() {
   async function removeItem(item) {
     if (!window.confirm(`Delete “${item.title}”? This cannot be undone.`)) return;
 
+    setSaving(true);
+    setMessage('Deleting gallery item…');
     try {
       await deleteDoc(doc(db, 'gallery', item.id));
-      if (item.storagePath && storage) {
+      if (item.fileId) {
         try {
-          await deleteObject(ref(storage, item.storagePath));
+          await deleteImageKitFile(item.fileId);
         } catch (error) {
-          console.warn('Gallery record deleted but Storage image could not be removed:', error);
+          console.warn('Gallery record deleted but ImageKit file could not be removed:', error);
         }
       }
       if (editingId === item.id) resetEditor();
@@ -290,7 +409,9 @@ export default function GalleryPage() {
       setMessage('Gallery item deleted.');
     } catch (error) {
       console.error(error);
-      setMessage('Delete failed. Please try again.');
+      setMessage(error?.message || 'Delete failed. Please try again.');
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -318,9 +439,9 @@ export default function GalleryPage() {
           <div>
             <div className={styles.kicker}>CONTENT MANAGEMENT • PHASE 3.4</div>
             <h1>Gallery</h1>
-            <p>Add real classroom moments, activities, events and achievements to the public EZEE VISION CHAMPUA website. Use an image upload or a hosted image URL.</p>
+            <p>Publish authentic classroom moments, activities, events and achievements. Device uploads now go to ImageKit; Firebase stores only the small gallery metadata record.</p>
           </div>
-          <div className={styles.collectionPill}><span>FIRESTORE</span><b>gallery</b><small>MEDIA + CONTENT</small></div>
+          <div className={styles.collectionPill}><span>FIRESTORE</span><b>gallery</b><small>METADATA ONLY</small></div>
         </div>
 
         <section className={styles.statsGrid}>
@@ -349,20 +470,22 @@ export default function GalleryPage() {
               <div className={styles.mediaPickerHead}>
                 <div>
                   <div className={styles.kicker}>IMAGE</div>
-                  <h3>Choose how you want to add it</h3>
+                  <h3>Add from your device or use a public URL</h3>
                 </div>
                 <span className={styles.mediaNote}>JPG • PNG • WEBP • max 8 MB</span>
               </div>
 
               <div className={styles.mediaChoices}>
                 <div className={styles.uploadBox}>
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} />
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} disabled={saving} />
                   <strong>Upload from device</strong>
-                  <span>{selectedFile ? selectedFile.name : 'Select an image from your phone or computer.'}</span>
-                  {selectedFile ? <button type="button" className={styles.clearButton} onClick={() => { setSelectedFile(null); setPreviewUrl(form.imageUrl || ''); if (fileInputRef.current) fileInputRef.current.value = ''; }}>Remove selected file</button> : null}
+                  <span>{selectedFile ? selectedFile.name : 'Saved to ImageKit, not Firebase Storage.'}</span>
+                  {selectedFile ? <button type="button" className={styles.clearButton} onClick={clearSelectedFile} disabled={saving}>Remove selected file</button> : null}
+                  {saving && selectedFile ? <div className={styles.progressTrack}><span style={{ width: `${uploadProgress}%` }}></span></div> : null}
+                  {saving && selectedFile ? <small className={styles.progressText}>{uploadProgress}% uploaded</small> : null}
                 </div>
                 <div className={styles.orDivider}>OR</div>
-                <label className={styles.urlBox}>Hosted image URL<input type="url" value={form.imageUrl} onChange={(e) => { updateField('imageUrl', e.target.value); if (!selectedFile) setPreviewUrl(e.target.value); }} placeholder="https://example.com/photo.jpg" /></label>
+                <label className={styles.urlBox}>Hosted image URL<input type="url" value={form.imageUrl} onChange={(e) => { updateField('imageUrl', e.target.value); if (!selectedFile) setPreviewUrl(e.target.value); }} placeholder="https://example.com/photo.jpg" disabled={saving} /></label>
               </div>
 
               {previewUrl ? (
@@ -374,17 +497,17 @@ export default function GalleryPage() {
             </section>
 
             <div className={styles.grid2}>
-              <label>Caption<textarea rows="4" value={form.caption} onChange={(e) => updateField('caption', e.target.value)} placeholder="Short description shown with the photo." maxLength={180} /></label>
-              <label>Display order<input inputMode="numeric" value={form.sortOrder} onChange={(e) => updateField('sortOrder', e.target.value.replace(/[^0-9]/g, ''))} placeholder="10" /><small className={styles.helper}>Lower number appears earlier. Use 10, 20, 30…</small></label>
+              <label>Caption<textarea rows="4" value={form.caption} onChange={(e) => updateField('caption', e.target.value)} placeholder="Short description shown with the photo." maxLength={180} disabled={saving} /></label>
+              <label>Display order<input inputMode="numeric" value={form.sortOrder} onChange={(e) => updateField('sortOrder', e.target.value.replace(/[^0-9]/g, ''))} placeholder="10" disabled={saving} /><small className={styles.helper}>Lower number appears earlier. Use 10, 20, 30…</small></label>
             </div>
 
             <div className={styles.optionGrid}>
-              <label className={styles.checkLabel}><input type="checkbox" checked={form.published} onChange={(e) => updateField('published', e.target.checked)} /><span><b>Publish on public website</b><small>Visible in the main Gallery section.</small></span></label>
-              <label className={styles.checkLabel}><input type="checkbox" checked={form.featured} onChange={(e) => updateField('featured', e.target.checked)} /><span><b>Mark as featured</b><small>Featured items are shown first.</small></span></label>
+              <label className={styles.checkLabel}><input type="checkbox" checked={form.published} onChange={(e) => updateField('published', e.target.checked)} disabled={saving} /><span><b>Publish on public website</b><small>Visible in the main Gallery section.</small></span></label>
+              <label className={styles.checkLabel}><input type="checkbox" checked={form.featured} onChange={(e) => updateField('featured', e.target.checked)} disabled={saving} /><span><b>Mark as featured</b><small>Featured items are shown first.</small></span></label>
             </div>
 
             <div className={styles.formBottom}>
-              <div className={styles.status}>{message || 'Add a real coaching photo, then save it to the secure gallery collection.'}</div>
+              <div className={styles.status}>{message || 'Upload a real coaching photo. Firebase stores only its metadata.'}</div>
               <button className={styles.saveButton} type="submit" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Update Gallery Item' : 'Save Gallery Item'}</button>
             </div>
           </form>
@@ -396,7 +519,7 @@ export default function GalleryPage() {
               <div className={styles.kicker}>LIVE CONTENT LIBRARY</div>
               <h2>Your gallery items</h2>
             </div>
-            <button className={styles.primaryOutline} type="button" onClick={resetEditor}>+ Add new</button>
+            <button className={styles.primaryOutline} type="button" onClick={resetEditor} disabled={saving}>+ Add new</button>
           </div>
 
           {items.length === 0 ? (
@@ -421,10 +544,10 @@ export default function GalleryPage() {
                     <p>{item.caption || 'No caption added.'}</p>
                     <small className={styles.orderLine}>Display order: {item.sortOrder ?? 10}</small>
                     <div className={styles.itemActions}>
-                      <button type="button" onClick={() => startEdit(item)}>Edit</button>
-                      <button type="button" onClick={() => togglePublished(item)}>{item.published === true ? 'Unpublish' : 'Publish'}</button>
-                      <button type="button" onClick={() => toggleFeatured(item)}>{item.featured === true ? 'Unfeature' : 'Feature'}</button>
-                      <button type="button" className={styles.deleteAction} onClick={() => removeItem(item)}>Delete</button>
+                      <button type="button" onClick={() => startEdit(item)} disabled={saving}>Edit</button>
+                      <button type="button" onClick={() => togglePublished(item)} disabled={saving}>{item.published === true ? 'Unpublish' : 'Publish'}</button>
+                      <button type="button" onClick={() => toggleFeatured(item)} disabled={saving}>{item.featured === true ? 'Unfeature' : 'Feature'}</button>
+                      <button type="button" className={styles.deleteAction} onClick={() => removeItem(item)} disabled={saving}>Delete</button>
                     </div>
                   </div>
                 </article>
@@ -435,8 +558,8 @@ export default function GalleryPage() {
 
         <section className={styles.noteBanner}>
           <div>
-            <strong>Privacy & safety</strong>
-            <span>Use photos you have permission to publish. Do not upload private student information or documents.</span>
+            <strong>Storage setup</strong>
+            <span>Firebase Storage is not used for gallery uploads. Device images are sent directly to ImageKit; Firestore keeps only lightweight metadata and the image URL.</span>
           </div>
           <span className={styles.secureBadge}>ADMIN ONLY</span>
         </section>
