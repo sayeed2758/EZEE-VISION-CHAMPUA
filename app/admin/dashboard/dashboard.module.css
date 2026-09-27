@@ -527,3 +527,7 @@
     display: none;
   }
 }
+
+.moduleCardActive{border-color:#b9d0ff;box-shadow:0 12px 30px rgba(37,99,235,.08)}
+.openButton{width:100%;margin-top:14px;padding:10px 12px;border:1px solid #0b1d3a;border-radius:10px;color:#fff;background:#0b1d3a;font-size:12px;font-weight:900;cursor:pointer}
+.openButton:hover{transform:translateY(-1px)}

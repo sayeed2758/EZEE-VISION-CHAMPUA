@@ -297,16 +297,22 @@ export default function AdminDashboardPage() {
 
           <div className={styles.moduleGrid}>
             {moduleRoadmap.map((module) => (
-              <article className={styles.moduleCard} key={module.key}>
+              <article className={`${styles.moduleCard} ${module.key === 'profile' ? styles.moduleCardActive : ''}`} key={module.key}>
                 <div className={styles.moduleTop}>
                   <span className={styles.moduleIcon}>{module.label.slice(0, 1)}</span>
                   <span className={styles.phaseTag}>NEXT • {module.phase}</span>
                 </div>
                 <h3>{module.label}</h3>
                 <p>{module.description}</p>
-                <button className={styles.lockedButton} type="button" disabled>
-                  Coming next
-                </button>
+                {module.key === 'profile' ? (
+                  <button className={styles.openButton} type="button" onClick={() => router.push('/admin/coaching-profile')}>
+                    Open Coaching Profile →
+                  </button>
+                ) : (
+                  <button className={styles.lockedButton} type="button" disabled>
+                    Coming next
+                  </button>
+                )}
               </article>
             ))}
           </div>
