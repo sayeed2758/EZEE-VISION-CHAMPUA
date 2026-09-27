@@ -1,19 +1,71 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, doc, getCountFromServer, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { auth, db, firebaseConfigured } from '../../../lib/firebase';
+import styles from './dashboard.module.css';
 
-const modules = [
-  ['Gallery', 'Manage coaching photos and events.', 'gallery'],
-  ['Results', 'Publish verified student achievements.', 'results'],
-  ['Testimonials', 'Manage real student/parent feedback.', 'testimonials'],
-  ['Updates', 'Publish notices, admissions and academic updates.', 'updates'],
-  ['Faculty', 'Manage educator profiles and subjects.', 'faculty'],
-  ['Enquiries', 'Review admission enquiries from the website.', 'enquiries']
+const contentCollections = [
+  ['gallery', 'Gallery'],
+  ['results', 'Results'],
+  ['testimonials', 'Testimonials'],
+  ['updates', 'Updates'],
+  ['faculty', 'Faculty'],
+  ['classes', 'Classes']
 ];
+
+const moduleRoadmap = [
+  {
+    key: 'profile',
+    label: 'Coaching Profile',
+    description: 'Edit your public brand information, contact details and highlights.',
+    phase: '3.2'
+  },
+  {
+    key: 'updates',
+    label: 'Announcements',
+    description: 'Publish admission notices, academic updates and important messages.',
+    phase: '3.3'
+  },
+  {
+    key: 'gallery',
+    label: 'Gallery',
+    description: 'Add and organise classroom, event and achievement photos.',
+    phase: '3.4'
+  },
+  {
+    key: 'faculty',
+    label: 'Faculty',
+    description: 'Create and manage educator profiles and teaching subjects.',
+    phase: '3.5'
+  },
+  {
+    key: 'classes',
+    label: 'Classes & Courses',
+    description: 'Manage class offerings, subjects and course information.',
+    phase: '3.6'
+  },
+  {
+    key: 'enquiries',
+    label: 'Admission Enquiries',
+    description: 'Review website enquiries and follow up with prospective students.',
+    phase: '3.8'
+  }
+];
+
+function formatCount(value) {
+  if (value === null || value === undefined) return '—';
+  return new Intl.NumberFormat('en-IN').format(value);
+}
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -21,12 +73,46 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [allowed, setAllowed] = useState(false);
   const [message, setMessage] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [counts, setCounts] = useState({
+    gallery: null,
+    results: null,
+    testimonials: null,
+    updates: null,
+    faculty: null,
+    classes: null,
+    enquiries: null
+  });
+
+  const loadCounts = useCallback(async () => {
+    if (!db) return;
+
+    setRefreshing(true);
+    try {
+      const entries = await Promise.all(
+        [...contentCollections, ['enquiries', 'Enquiries']].map(async ([collectionName]) => {
+          try {
+            const snap = await getCountFromServer(collection(db, collectionName));
+            return [collectionName, snap.data().count];
+          } catch {
+            return [collectionName, null];
+          }
+        })
+      );
+
+      setCounts((previous) => ({ ...previous, ...Object.fromEntries(entries) }));
+      setLastUpdated(new Date());
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!firebaseConfigured || !auth || !db) {
       setLoading(false);
       setMessage('Firebase is not configured yet.');
-      return;
+      return undefined;
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -47,6 +133,8 @@ export default function AdminDashboardPage() {
 
         setUser(currentUser);
         setAllowed(true);
+        setMessage('');
+        await loadCounts();
       } catch {
         setMessage('Unable to verify admin access. Check your Firestore rules and admin document.');
       } finally {
@@ -55,69 +143,183 @@ export default function AdminDashboardPage() {
     });
 
     return unsubscribe;
-  }, [router]);
+  }, [loadCounts, router]);
 
   async function handleLogout() {
     if (auth) await signOut(auth);
     router.replace('/admin/login');
   }
 
+  const publishedContent = useMemo(() => {
+    const values = [
+      counts.gallery,
+      counts.results,
+      counts.testimonials,
+      counts.updates,
+      counts.faculty,
+      counts.classes
+    ];
+
+    if (values.some((value) => value === null)) return null;
+    return values.reduce((total, value) => total + value, 0);
+  }, [counts]);
+
   if (loading) {
-    return <main className="admin-app-page"><div className="admin-loading">Checking secure access…</div></main>;
+    return (
+      <main className={styles.page}>
+        <div className={styles.loadingCard}>Checking secure access…</div>
+      </main>
+    );
   }
 
   if (!allowed) {
-    return <main className="admin-app-page"><div className="admin-loading">{message || 'Access denied.'}</div></main>;
+    return (
+      <main className={styles.page}>
+        <div className={styles.loadingCard}>{message || 'Access denied.'}</div>
+      </main>
+    );
   }
 
   return (
-    <main className="admin-app-page">
-      <header className="admin-topbar">
-        <div className="admin-topbar-brand">
-          <div className="brand-mark admin-mark">EV</div>
+    <main className={styles.page}>
+      <header className={styles.topbar}>
+        <div className={styles.brandWrap}>
+          <div className={styles.logo}>EV</div>
           <div>
             <strong>EZEE VISION</strong>
-            <span>ADMIN PANEL</span>
+            <span>ADMIN CONTROL CENTRE</span>
           </div>
         </div>
-        <button className="admin-logout" onClick={handleLogout}>Sign out</button>
+
+        <div className={styles.topActions}>
+          <a className={styles.siteButton} href="/" target="_blank" rel="noreferrer">
+            View Website
+          </a>
+          <button className={styles.logoutButton} onClick={handleLogout}>Sign out</button>
+        </div>
       </header>
 
-      <section className="admin-dashboard-shell">
-        <div className="admin-welcome">
-          <div className="admin-card-kicker">CONTROL CENTRE</div>
-          <h1>Welcome back.</h1>
-          <p>Signed in as <b>{user?.email}</b>. This private dashboard is the foundation for the website content manager.</p>
-        </div>
-
-        <div className="admin-status-grid">
-          <div className="admin-status-card"><span>AUTHENTICATION</span><b>Connected</b><small>Firebase Auth</small></div>
-          <div className="admin-status-card"><span>DATABASE</span><b>Connected</b><small>Cloud Firestore</small></div>
-          <div className="admin-status-card"><span>STORAGE</span><b>Ready</b><small>Firebase Storage rules</small></div>
-          <div className="admin-status-card"><span>PUBLIC SITE</span><b>Live</b><small>Vercel deployment</small></div>
-        </div>
-
-        <div className="admin-module-grid">
-          {modules.map(([title, text, key]) => (
-            <article key={key} className="admin-module-card">
-              <div className="admin-module-icon">{title.slice(0, 1)}</div>
-              <div>
-                <h2>{title}</h2>
-                <p>{text}</p>
-              </div>
-              <span className="admin-module-status">SETUP</span>
-            </article>
-          ))}
-        </div>
-
-        <div className="admin-next-step">
+      <section className={styles.shell}>
+        <div className={styles.heroRow}>
           <div>
-            <div className="admin-card-kicker">PHASE 2 FOUNDATION</div>
-            <h2>Security first. Content tools next.</h2>
-            <p>The next implementation will connect these modules to Firestore and Storage while keeping writes restricted to active admin accounts.</p>
+            <div className={styles.kicker}>CONTROL CENTRE • PHASE 3.1</div>
+            <h1>{getGreeting()}, <span>Shahid Sir.</span></h1>
+            <p>
+              Your private workspace for managing the EZEE VISION CHAMPUA public website.
+              Signed in as <b>{user?.email}</b>.
+            </p>
           </div>
-          <a className="btn btn-outline" href="/">View Website</a>
+
+          <button className={styles.refreshButton} onClick={loadCounts} disabled={refreshing}>
+            <span className={refreshing ? styles.spin : ''}>↻</span>
+            {refreshing ? 'Refreshing…' : 'Refresh data'}
+          </button>
         </div>
+
+        <section className={styles.statGrid} aria-label="Website overview">
+          <article className={`${styles.statCard} ${styles.statPrimary}`}>
+            <span className={styles.statLabel}>STUDENTS</span>
+            <strong>150</strong>
+            <small>Current coaching community</small>
+          </article>
+
+          <article className={styles.statCard}>
+            <span className={styles.statLabel}>CLASSES</span>
+            <strong>4–12</strong>
+            <small>Publicly offered range</small>
+          </article>
+
+          <article className={styles.statCard}>
+            <span className={styles.statLabel}>PUBLISHED CONTENT</span>
+            <strong>{formatCount(publishedContent)}</strong>
+            <small>Across website collections</small>
+          </article>
+
+          <article className={styles.statCard}>
+            <span className={styles.statLabel}>ENQUIRIES</span>
+            <strong>{formatCount(counts.enquiries)}</strong>
+            <small>Admission enquiries in Firestore</small>
+          </article>
+        </section>
+
+        <div className={styles.contentGrid}>
+          <section className={styles.panel}>
+            <div className={styles.panelHead}>
+              <div>
+                <div className={styles.kicker}>WEBSITE OVERVIEW</div>
+                <h2>Content snapshot</h2>
+              </div>
+              <div className={styles.updatedText}>
+                {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Waiting for data'}
+              </div>
+            </div>
+
+            <div className={styles.snapshotList}>
+              {contentCollections.map(([key, label]) => (
+                <div className={styles.snapshotItem} key={key}>
+                  <span className={styles.snapshotIcon}>{label.slice(0, 1)}</span>
+                  <div>
+                    <strong>{label}</strong>
+                    <small>Firestore collection</small>
+                  </div>
+                  <b>{formatCount(counts[key])}</b>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <aside className={styles.panel}>
+            <div className={styles.panelHead}>
+              <div>
+                <div className={styles.kicker}>SYSTEM STATUS</div>
+                <h2>Everything is connected.</h2>
+              </div>
+              <span className={styles.liveBadge}>LIVE</span>
+            </div>
+
+            <div className={styles.statusList}>
+              <div><span>●</span><strong>Authentication</strong><small>Firebase Auth</small></div>
+              <div><span>●</span><strong>Database</strong><small>Cloud Firestore</small></div>
+              <div><span>●</span><strong>Public site</strong><small>Vercel deployment</small></div>
+              <div><span>●</span><strong>Admin access</strong><small>UID verified</small></div>
+            </div>
+          </aside>
+        </div>
+
+        <section className={styles.roadmapSection}>
+          <div className={styles.panelHead}>
+            <div>
+              <div className={styles.kicker}>CONTENT MANAGEMENT ROADMAP</div>
+              <h2>What you will control from here</h2>
+            </div>
+            <span className={styles.phasePill}>PHASE 3</span>
+          </div>
+
+          <div className={styles.moduleGrid}>
+            {moduleRoadmap.map((module) => (
+              <article className={styles.moduleCard} key={module.key}>
+                <div className={styles.moduleTop}>
+                  <span className={styles.moduleIcon}>{module.label.slice(0, 1)}</span>
+                  <span className={styles.phaseTag}>NEXT • {module.phase}</span>
+                </div>
+                <h3>{module.label}</h3>
+                <p>{module.description}</p>
+                <button className={styles.lockedButton} type="button" disabled>
+                  Coming next
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.bottomBanner}>
+          <div>
+            <div className={styles.kicker}>BUILDING IN STAGES</div>
+            <h2>Security is live. Now we build your content controls.</h2>
+            <p>Phase 3.1 is the command-centre foundation. Each next module will plug into this same secure admin area.</p>
+          </div>
+          <a className={styles.bannerButton} href="/">Open public website →</a>
+        </section>
       </section>
     </main>
   );
