@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, onSnapshot, query, where } from 'firebase/firestore';
 import { db, firebaseConfigured } from '../lib/firebase';
 
 const classGroups = [
@@ -88,6 +88,22 @@ export default function Home() {
   });
   const [publishedUpdates, setPublishedUpdates] = useState(DEFAULT_UPDATES);
   const [publishedGallery, setPublishedGallery] = useState(DEFAULT_GALLERY);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [galleryPaused, setGalleryPaused] = useState(false);
+
+  useEffect(() => {
+    setGalleryIndex(0);
+  }, [publishedGallery.length]);
+
+  useEffect(() => {
+    if (galleryPaused || publishedGallery.length <= 1) return undefined;
+
+    const timer = window.setInterval(() => {
+      setGalleryIndex((current) => (current + 1) % publishedGallery.length);
+    }, 4500);
+
+    return () => window.clearInterval(timer);
+  }, [galleryPaused, publishedGallery.length]);
 
   useEffect(() => {
     if (!firebaseConfigured || !db) return;
@@ -115,30 +131,37 @@ export default function Home() {
           }));
 
         setPublishedUpdates(liveUpdates);
-      }).catch(() => {}),
-      getDocs(collection(db, 'gallery')).then((snapshot) => {
-        const liveGallery = snapshot.docs
-          .map((item) => ({ id: item.id, ...item.data() }))
-          .filter((item) => item.published === true && item.imageUrl)
-          .sort((a, b) => {
-            if (a.featured !== b.featured) return a.featured ? -1 : 1;
-            const orderA = Number(a.sortOrder ?? 9999);
-            const orderB = Number(b.sortOrder ?? 9999);
-            if (orderA !== orderB) return orderA - orderB;
-            return String(b.createdAt?.seconds || '').localeCompare(String(a.createdAt?.seconds || ''));
-          })
-          .slice(0, 6)
-          .map((item) => ({
-            id: item.id,
-            category: item.category || 'Gallery',
-            title: item.title || 'EZEE VISION CHAMPUA',
-            caption: item.caption || '',
-            imageUrl: item.imageUrl
-          }));
-
-        if (liveGallery.length > 0) setPublishedGallery(liveGallery);
       }).catch(() => {})
     ]);
+  }, []);
+
+  useEffect(() => {
+    if (!firebaseConfigured || !db) return undefined;
+
+    const galleryQuery = query(collection(db, 'gallery'), where('published', '==', true));
+    const unsubscribe = onSnapshot(galleryQuery, (snapshot) => {
+      const liveGallery = snapshot.docs
+        .map((item) => ({ id: item.id, ...item.data() }))
+        .filter((item) => item.imageUrl)
+        .sort((a, b) => {
+          if (a.featured !== b.featured) return a.featured ? -1 : 1;
+          const orderA = Number(a.sortOrder ?? 9999);
+          const orderB = Number(b.sortOrder ?? 9999);
+          if (orderA !== orderB) return orderA - orderB;
+          return String(b.createdAt?.seconds || '').localeCompare(String(a.createdAt?.seconds || ''));
+        })
+        .map((item) => ({
+          id: item.id,
+          category: item.category || 'Gallery',
+          title: item.title || 'EZEE VISION CHAMPUA',
+          caption: item.caption || '',
+          imageUrl: item.imageUrl
+        }));
+
+      setPublishedGallery(liveGallery);
+    }, () => {});
+
+    return () => unsubscribe();
   }, []);
 
   const goTo = (id) => {
@@ -363,7 +386,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="gallery" className="section section-anchor">
+      <section id="gallery" className="section section-anchor gallery-section">
         <div className="shell">
           <div className="section-head">
             <div>
@@ -372,119 +395,265 @@ export default function Home() {
             </div>
             <p>Real classroom moments, activities and achievements can be published here through the Admin Gallery Manager.</p>
           </div>
+
           <style>{`
-            .gallery-grid-modern {
-              display: grid;
-              grid-template-columns: repeat(2, minmax(0, 1fr));
-              gap: 20px;
-              align-items: stretch;
+            .gallery-section {
+              scroll-margin-top: 112px;
             }
-            .gallery-card-modern {
-              display: flex;
-              flex-direction: column;
+            .gallery-slider {
+              position: relative;
               overflow: hidden;
-              min-width: 0;
-              border-radius: 28px;
               border: 1px solid rgba(11, 36, 75, .10);
+              border-radius: 30px;
               background: #fff;
-              box-shadow: 0 18px 44px rgba(12, 38, 76, .08);
+              box-shadow: 0 22px 55px rgba(12, 38, 76, .09);
             }
-            .gallery-image-wrap {
+            .gallery-viewport {
+              position: relative;
+              overflow: hidden;
+            }
+            .gallery-track {
+              display: flex;
+              transform: translate3d(calc(var(--gallery-index) * -100%), 0, 0);
+              transition: transform .65s cubic-bezier(.22, .61, .36, 1);
+              will-change: transform;
+            }
+            .gallery-slide {
+              flex: 0 0 100%;
+              min-width: 100%;
+              background: #fff;
+            }
+            .gallery-slide-image {
               width: 100%;
               aspect-ratio: 16 / 9;
               overflow: hidden;
+              display: grid;
+              place-items: center;
               background: #eef3fa;
             }
-            .gallery-image-wrap img {
+            .gallery-slide-image img {
               display: block;
               width: 100%;
               height: 100%;
-              object-fit: cover;
+              object-fit: contain;
               object-position: center;
+              user-select: none;
             }
-            .gallery-copy-modern {
-              display: flex;
-              flex: 1;
-              flex-direction: column;
-              padding: 20px 22px 22px;
-              background: #fff;
+            .gallery-slide-copy {
+              padding: 22px 24px 26px;
             }
-            .gallery-category-modern {
-              margin: 0 0 8px;
+            .gallery-slide-category {
+              margin-bottom: 7px;
+              color: #2767c9;
               font-size: 11px;
               font-weight: 800;
               letter-spacing: .18em;
               text-transform: uppercase;
-              color: #2767c9;
             }
-            .gallery-title-modern {
+            .gallery-slide-title {
               margin: 0;
               color: #0b1b35;
-              font-size: clamp(21px, 3vw, 30px);
-              line-height: 1.1;
-              letter-spacing: -.03em;
+              font-size: clamp(24px, 4vw, 38px);
+              line-height: 1.08;
+              letter-spacing: -.035em;
             }
-            .gallery-caption-modern {
+            .gallery-slide-caption {
               margin: 12px 0 0;
+              max-width: 780px;
               color: #64748b;
-              font-size: 14px;
+              font-size: 15px;
               line-height: 1.65;
             }
-            .gallery-card-modern.is-fallback {
-              min-height: 340px;
-              justify-content: flex-end;
-              background: linear-gradient(145deg, #123f76, #081c39);
+            .gallery-slider-controls {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 14px;
+              padding: 14px 18px 18px;
+              border-top: 1px solid rgba(11, 36, 75, .07);
+              background: #fff;
+            }
+            .gallery-arrow {
+              width: 42px;
+              height: 42px;
+              display: grid;
+              place-items: center;
+              flex: 0 0 auto;
+              border: 1px solid rgba(11, 36, 75, .12);
+              border-radius: 50%;
+              background: #fff;
+              color: #0b1b35;
+              font-size: 20px;
+              cursor: pointer;
+              -webkit-tap-highlight-color: transparent;
+            }
+            .gallery-arrow:active {
+              transform: scale(.97);
+            }
+            .gallery-dots {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 7px;
+              flex: 1;
+              min-width: 0;
+            }
+            .gallery-dot {
+              width: 7px;
+              height: 7px;
+              padding: 0;
+              border: 0;
+              border-radius: 50%;
+              background: #cbd5e1;
+              cursor: pointer;
+              -webkit-tap-highlight-color: transparent;
+            }
+            .gallery-dot.active {
+              width: 24px;
+              border-radius: 999px;
+              background: #1769d2;
+            }
+            .gallery-slide-counter {
+              min-width: 48px;
+              color: #64748b;
+              font-size: 12px;
+              font-weight: 800;
+              text-align: right;
+              letter-spacing: .08em;
+            }
+            .gallery-placeholder {
+              padding: 48px 24px;
+              border: 1px dashed rgba(11, 36, 75, .16);
+              border-radius: 28px;
+              background: #fff;
+              color: #64748b;
+              text-align: center;
+            }
+            .gallery-placeholder strong {
+              display: block;
+              margin-bottom: 7px;
+              color: #0b1b35;
+              font-size: 22px;
             }
             @media (max-width: 720px) {
-              .gallery-grid-modern {
-                grid-template-columns: 1fr;
-                gap: 16px;
+              .gallery-section {
+                scroll-margin-top: 98px;
               }
-              .gallery-card-modern {
+              .gallery-slider {
                 border-radius: 24px;
               }
-              .gallery-copy-modern {
+              .gallery-slide-image {
+                aspect-ratio: 16 / 9;
+              }
+              .gallery-slide-copy {
                 padding: 18px 18px 20px;
+              }
+              .gallery-slide-title {
+                font-size: 28px;
+              }
+              .gallery-slide-caption {
+                font-size: 14px;
+              }
+              .gallery-slider-controls {
+                padding: 12px 14px 14px;
+                gap: 8px;
+              }
+              .gallery-arrow {
+                width: 40px;
+                height: 40px;
               }
             }
           `}</style>
-          <div className="gallery-grid gallery-grid-modern">
-            {publishedGallery.slice(0, 4).map((item, index) => {
-              const fallback = DEFAULT_GALLERY[index] || DEFAULT_GALLERY[0];
-              const isLive = Boolean(item.imageUrl);
-              const cleanImageUrl = isLive ? String(item.imageUrl).replace(/\"/g, '') : '';
 
-              return (
-                <article
-                  className={`gallery-card-modern${isLive ? '' : ' is-fallback'}`}
-                  key={item.id || `${item.title}-${index}`}
+          {publishedGallery.length > 0 ? (
+            <div
+              className="gallery-slider"
+              onMouseEnter={() => setGalleryPaused(true)}
+              onMouseLeave={() => setGalleryPaused(false)}
+              onFocus={() => setGalleryPaused(true)}
+              onBlur={() => setGalleryPaused(false)}
+              onTouchStart={() => setGalleryPaused(true)}
+              onTouchEnd={() => {
+                window.setTimeout(() => setGalleryPaused(false), 1200);
+              }}
+              aria-label="EZEE VISION CHAMPUA photo gallery"
+            >
+              <div className="gallery-viewport">
+                <div
+                  className="gallery-track"
+                  style={{ '--gallery-index': galleryIndex }}
                 >
-                  {isLive ? (
-                    <>
-                      <div className="gallery-image-wrap">
-                        <img
-                          src={cleanImageUrl}
-                          alt={item.title || fallback.title}
-                          loading="lazy"
-                        />
+                  {publishedGallery.map((item, index) => (
+                    <article className="gallery-slide" key={item.id || `${item.title}-${index}`}>
+                      {item.imageUrl ? (
+                        <div className="gallery-slide-image">
+                          <img
+                            src={String(item.imageUrl).replace(/\"/g, '')}
+                            alt={item.title || 'EZEE VISION CHAMPUA gallery photo'}
+                            loading={index === 0 ? 'eager' : 'lazy'}
+                            draggable="false"
+                          />
+                        </div>
+                      ) : null}
+
+                      <div className="gallery-slide-copy">
+                        <div className="gallery-slide-category">{item.category || 'Gallery'}</div>
+                        <h3 className="gallery-slide-title">{item.title || 'EZEE VISION CHAMPUA'}</h3>
+                        <p className="gallery-slide-caption">
+                          {item.caption || 'Real classroom moments from the EZEE VISION CHAMPUA journey.'}
+                        </p>
                       </div>
-                      <div className="gallery-copy-modern">
-                        <div className="gallery-category-modern">{item.category || fallback.category}</div>
-                        <h3 className="gallery-title-modern">{item.title || fallback.title}</h3>
-                        <p className="gallery-caption-modern">{item.caption || fallback.caption}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="gallery-copy-modern" style={{ background: 'transparent', color: '#fff' }}>
-                      <div className="gallery-category-modern" style={{ color: '#c9dcff' }}>{item.category || fallback.category}</div>
-                      <h3 className="gallery-title-modern" style={{ color: '#fff' }}>{item.title || fallback.title}</h3>
-                      <p className="gallery-caption-modern" style={{ color: 'rgba(255,255,255,.78)' }}>{item.caption || fallback.caption}</p>
-                    </div>
-                  )}
-                </article>
-              );
-            })}
-          </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              {publishedGallery.length > 1 && (
+                <div className="gallery-slider-controls">
+                  <button
+                    type="button"
+                    className="gallery-arrow"
+                    onClick={() => setGalleryIndex((current) => (current - 1 + publishedGallery.length) % publishedGallery.length)}
+                    aria-label="Previous gallery photo"
+                  >
+                    ←
+                  </button>
+
+                  <div className="gallery-dots" role="tablist" aria-label="Gallery photos">
+                    {publishedGallery.map((item, index) => (
+                      <button
+                        key={item.id || index}
+                        type="button"
+                        className={index === galleryIndex ? 'gallery-dot active' : 'gallery-dot'}
+                        onClick={() => setGalleryIndex(index)}
+                        aria-label={`Show gallery photo ${index + 1}`}
+                        aria-selected={index === galleryIndex}
+                        role="tab"
+                      />
+                    ))}
+                  </div>
+
+                  <div className="gallery-slide-counter">
+                    {String(galleryIndex + 1).padStart(2, '0')} / {String(publishedGallery.length).padStart(2, '0')}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="gallery-arrow"
+                    onClick={() => setGalleryIndex((current) => (current + 1) % publishedGallery.length)}
+                    aria-label="Next gallery photo"
+                  >
+                    →
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="gallery-placeholder">
+              <strong>Gallery coming soon.</strong>
+              New photos published from the Admin Gallery Manager will appear here automatically.
+            </div>
+          )}
         </div>
       </section>
 
