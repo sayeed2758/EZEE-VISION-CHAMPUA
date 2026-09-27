@@ -644,11 +644,11 @@ export default function Home() {
         }
         .ev-enquiry-modal {
           position: relative;
-          width: min(680px, 100%);
-          max-height: min(92vh, 860px);
+          width: min(570px, 100%);
+          max-height: min(82vh, 720px);
           overflow: auto;
           border: 1px solid rgba(10, 52, 108, .12);
-          border-radius: 24px;
+          border-radius: 20px;
           background: #fff;
           box-shadow: 0 36px 90px rgba(0,0,0,.34), 0 10px 26px rgba(4, 47, 105, .12), inset 0 1px 0 rgba(255,255,255,.94);
           scrollbar-width: thin;
@@ -688,50 +688,50 @@ export default function Home() {
         }
         .ev-enquiry-close:active { transform: scale(.95); opacity: .78; }
         .ev-enquiry-modal-body {
-          padding: 24px 28px 26px;
+          padding: 18px 20px 20px;
           background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
         }
         .ev-enquiry-modal-label {
           display: inline-flex;
           align-items: center;
-          gap: 7px;
-          margin-bottom: 8px;
+          gap: 5px;
+          margin-bottom: 6px;
           color: #0b5cbb;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 950;
           letter-spacing: .18em;
           text-transform: uppercase;
         }
         .ev-enquiry-modal-label::before {
           content: '';
-          width: 20px;
-          height: 3px;
+          width: 18px;
+          height: 2.5px;
           border-radius: 999px;
           background: linear-gradient(90deg, #0b5cbb, #1d8bff);
         }
         .ev-enquiry-modal-title {
           margin: 0;
           color: #0a1c3d;
-          font-size: clamp(23px, 4vw, 31px);
+          font-size: clamp(20px, 3.2vw, 25px);
           line-height: 1.04;
           letter-spacing: -.045em;
         }
         .ev-enquiry-modal-subtitle {
-          margin: 8px 0 18px;
+          margin: 6px 0 12px;
           color: #63748f;
-          font-size: 13px;
-          line-height: 1.55;
+          font-size: 12px;
+          line-height: 1.42;
         }
         .ev-enquiry-form {
           display: grid;
-          gap: 13px;
+          gap: 9px;
           margin: 0;
         }
         .ev-enquiry-form label {
           display: grid;
-          gap: 7px;
+          gap: 5px;
           color: #223a62;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 900;
           letter-spacing: .07em;
           text-transform: uppercase;
@@ -745,14 +745,14 @@ export default function Home() {
         .ev-enquiry-form textarea,
         .ev-enquiry-form select {
           width: 100%;
-          min-height: 54px;
-          padding: 0 15px;
+          min-height: 46px;
+          padding: 0 12px;
           border: 1.5px solid rgba(18, 34, 58, .40);
-          border-radius: 11px;
+          border-radius: 10px;
           outline: none;
           background: #fff;
           color: #172842;
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 600;
           letter-spacing: 0;
           text-transform: none;
@@ -762,9 +762,9 @@ export default function Home() {
           transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
         }
         .ev-enquiry-form textarea {
-          min-height: 92px;
-          padding-top: 14px;
-          padding-bottom: 14px;
+          min-height: 70px;
+          padding-top: 10px;
+          padding-bottom: 10px;
           resize: vertical;
         }
         .ev-enquiry-form input::placeholder,
@@ -782,29 +782,36 @@ export default function Home() {
         .ev-enquiry-form > .btn,
         .ev-enquiry-form button[type='submit'] {
           width: 100%;
-          min-height: 56px;
+          min-height: 48px;
           margin-top: 2px;
-          border-radius: 12px;
+          border-radius: 10px;
           background: linear-gradient(145deg, #0c4a85 0%, #063665 55%, #052d59 100%);
           box-shadow: 0 10px 20px rgba(5, 48, 93, .22), inset 0 1px 0 rgba(255,255,255,.16), inset 0 -3px 0 rgba(0,0,0,.15);
           color: #fff;
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 900;
           letter-spacing: .01em;
         }
         .ev-enquiry-form > .btn:active,
         .ev-enquiry-form button[type='submit']:active { transform: translateY(2px); opacity: .82; }
-        .ev-enquiry-form .form-note { font-size: 11px; line-height: 1.45; }
+        .ev-enquiry-form .form-note { font-size: 10px; line-height: 1.35; }
         @media (max-width: 560px) {
           .ev-enquiry-overlay { padding: 8px; }
-          .ev-enquiry-modal { width: 100%; max-height: 94vh; border-radius: 21px; }
-          .ev-enquiry-banner-wrap { border-radius: 21px 21px 0 0; }
-          .ev-enquiry-close { top: 8px; right: 8px; width: 38px; height: 38px; font-size: 25px; }
-          .ev-enquiry-modal-body { padding: 18px 15px 20px; }
-          .ev-enquiry-form .form-row { grid-template-columns: 1fr; gap: 13px; }
+          .ev-enquiry-modal { width: 100%; max-height: 82vh; border-radius: 18px; }
+          .ev-enquiry-banner-wrap { border-radius: 18px 18px 0 0; }
+          .ev-enquiry-close { top: 7px; right: 7px; width: 34px; height: 34px; font-size: 22px; }
+          .ev-enquiry-modal-body { padding: 15px 14px 17px; }
+          .ev-enquiry-modal-label { font-size: 8.5px; margin-bottom: 5px; }
+          .ev-enquiry-modal-title { font-size: 21px; }
+          .ev-enquiry-modal-subtitle { font-size: 11px; margin: 5px 0 10px; }
+          .ev-enquiry-form { gap: 8px; }
+          .ev-enquiry-form .form-row { grid-template-columns: 1fr; gap: 8px; }
           .ev-enquiry-form input,
           .ev-enquiry-form textarea,
-          .ev-enquiry-form select { min-height: 52px; font-size: 15.5px; }
+          .ev-enquiry-form select { min-height: 46px; font-size: 14px; padding-left: 11px; padding-right: 11px; }
+          .ev-enquiry-form textarea { min-height: 66px; }
+          .ev-enquiry-form > .btn,
+          .ev-enquiry-form button[type='submit'] { min-height: 46px; font-size: 14px; }
         }
       `}</style>
 
