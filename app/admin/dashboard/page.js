@@ -316,6 +316,10 @@ export default function AdminDashboardPage() {
                   <button className={styles.openButton} type="button" onClick={() => router.push('/admin/gallery')}>
                     Open Gallery Manager →
                   </button>
+                ) : module.key === 'faculty' ? (
+                  <button className={styles.openButton} type="button" onClick={() => router.push('/admin/faculty')}>
+                    Open Faculty Manager →
+                  </button>
                 ) : (
                   <button className={styles.lockedButton} type="button" disabled>
                     Coming next
