@@ -1024,18 +1024,18 @@ export default function Home() {
         }
         .ev-teacher-left {
           left: 5%;
-          height: 98%;
-          z-index: 4;
+          height: 87%;
+          z-index: 2;
         }
         .ev-teacher-center {
           left: 50%;
           transform: translateX(-50%);
-          height: 82%;
-          z-index: 2;
+          height: 98%;
+          z-index: 4;
         }
         .ev-teacher-right {
           right: 4%;
-          height: 78%;
+          height: 82%;
           z-index: 3;
         }
         .ev-scholarship-bar {
@@ -1103,9 +1103,9 @@ export default function Home() {
             height: 300px;
             margin-top: 10px;
           }
-          .ev-teacher-left { left: -2%; height: 96%; z-index: 4; }
-          .ev-teacher-center { height: 78%; z-index: 2; }
-          .ev-teacher-right { right: -2%; height: 72%; z-index: 3; }
+          .ev-teacher-left { left: -1%; height: 76%; }
+          .ev-teacher-center { height: 95%; }
+          .ev-teacher-right { right: -1%; height: 71%; }
           .ev-green-diamond { width: 112px; height: 190px; bottom: 18px; }
           .ev-green-ring { width: 180px; height: 180px; bottom: -34px; border-width: 13px; }
           .ev-green-block-left, .ev-green-block-right { width: 58px; height: 118px; bottom: 47px; }
@@ -1117,9 +1117,9 @@ export default function Home() {
           .ev-home-subheadline { font-size: 13px; }
           .ev-home-action { flex-basis: 145px; font-size: 13px; min-height: 47px; }
           .ev-teachers-stage { height: 270px; }
-          .ev-teacher-left { left: -8%; height: 92%; z-index: 4; }
-          .ev-teacher-center { height: 76%; z-index: 2; }
-          .ev-teacher-right { right: -9%; height: 66%; z-index: 3; }
+          .ev-teacher-left { left: -7%; height: 73%; }
+          .ev-teacher-center { height: 94%; }
+          .ev-teacher-right { right: -8%; height: 68%; }
         }
         @media (prefers-reduced-motion: reduce) {
           .ev-scholarship-track { animation-duration: 32s; }
@@ -1141,8 +1141,8 @@ export default function Home() {
             <div className="ev-green-element ev-green-block-left" aria-hidden="true"></div>
             <div className="ev-green-element ev-green-block-right" aria-hidden="true"></div>
 
-            <img className="ev-teacher ev-teacher-left" src="/teachers/teacher-1.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
-            <img className="ev-teacher ev-teacher-center" src="/teachers/teacher-2.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
+            <img className="ev-teacher ev-teacher-left" src="/teachers/teacher-2.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
+            <img className="ev-teacher ev-teacher-center" src="/teachers/teacher-1.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
             <img className="ev-teacher ev-teacher-right" src="/teachers/teacher-3.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
           </div>
 
