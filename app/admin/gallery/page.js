@@ -212,7 +212,7 @@ export default function GalleryPage() {
   async function uploadToImageKit(file) {
     const authParams = await getImageKitAuth();
     const fileName = `${Date.now()}-${cleanFileName(file.name)}`;
-    const folder = '/ezee-vision-champua/gallery';
+    const folder = '/ezee-vision/gallery';
 
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
