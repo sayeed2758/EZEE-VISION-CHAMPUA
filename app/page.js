@@ -90,6 +90,7 @@ export default function Home() {
   const [publishedGallery, setPublishedGallery] = useState(DEFAULT_GALLERY);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [galleryPaused, setGalleryPaused] = useState(false);
+  const [publishedFaculty, setPublishedFaculty] = useState([]);
 
   useEffect(() => {
     setGalleryIndex(0);
@@ -131,6 +132,20 @@ export default function Home() {
           }));
 
         setPublishedUpdates(liveUpdates);
+      }).catch(() => {}),
+      getDocs(collection(db, 'faculty')).then((snapshot) => {
+        const liveFaculty = snapshot.docs
+          .map((item) => ({ id: item.id, ...item.data() }))
+          .filter((item) => item.published === true)
+          .sort((a, b) => {
+            if (a.featured !== b.featured) return a.featured ? -1 : 1;
+            const orderA = Number(a.sortOrder ?? 9999);
+            const orderB = Number(b.sortOrder ?? 9999);
+            if (orderA !== orderB) return orderA - orderB;
+            return String(a.name || '').localeCompare(String(b.name || ''));
+          });
+
+        setPublishedFaculty(liveFaculty);
       }).catch(() => {})
     ]);
   }, []);
@@ -328,24 +343,148 @@ export default function Home() {
       </section>
 
       <section id="faculty" className="section section-dark section-anchor">
-        <div className="shell faculty-grid">
-          <div className="faculty-portrait">
-            <div className="portrait-ring"></div>
-            <div className="portrait-avatar">SS</div>
-            <div className="portrait-caption"><span>FOUNDER • EDUCATOR</span><b>EZEE VISION CHAMPUA</b></div>
-          </div>
-          <div className="faculty-copy">
-            <div className="section-kicker light">MEET THE EDUCATOR</div>
-            <h2>Teaching with clarity, structure and a human touch.</h2>
-            <p>
-              The teaching approach at EZEE VISION CHAMPUA is centred on making concepts easier to understand, creating consistent practice and helping students build confidence step by step.
-            </p>
-            <div className="faculty-meta">
-              <div><span>Name</span><b>Sayeedur Rahman (Shahid)</b></div>
-              <div><span>Role</span><b>Teacher • Content Creator • Educator</b></div>
+        <div className="shell">
+          <div className="section-head dark-head">
+            <div>
+              <div className="section-kicker light">MEET OUR EDUCATORS</div>
+              <h2>Teachers who guide the EZEE VISION journey.</h2>
             </div>
-            <button className="btn btn-light" onClick={() => goTo('contact')}>Connect With EZEE VISION →</button>
+            <p>Faculty profiles published from the Admin Faculty Manager appear here automatically.</p>
           </div>
+
+          <style>{`
+            .faculty-public-grid {
+              display: grid;
+              grid-template-columns: repeat(3, minmax(0, 1fr));
+              gap: 20px;
+            }
+            .faculty-public-card {
+              overflow: hidden;
+              border: 1px solid rgba(255,255,255,.10);
+              border-radius: 28px;
+              background: rgba(255,255,255,.06);
+              box-shadow: 0 22px 55px rgba(0,0,0,.14);
+            }
+            .faculty-public-photo {
+              width: 100%;
+              aspect-ratio: 4 / 3;
+              background: rgba(255,255,255,.07);
+              overflow: hidden;
+              display: grid;
+              place-items: center;
+            }
+            .faculty-public-photo img {
+              width: 100%;
+              height: 100%;
+              display: block;
+              object-fit: cover;
+            }
+            .faculty-public-photo .faculty-fallback {
+              width: 92px;
+              height: 92px;
+              display: grid;
+              place-items: center;
+              border-radius: 28px;
+              background: rgba(255,255,255,.10);
+              color: #fff;
+              font-size: 30px;
+              font-weight: 800;
+              letter-spacing: -.04em;
+            }
+            .faculty-public-copy {
+              padding: 22px;
+            }
+            .faculty-public-role {
+              margin-bottom: 8px;
+              color: #79b1ff;
+              font-size: 10px;
+              font-weight: 800;
+              letter-spacing: .18em;
+              text-transform: uppercase;
+            }
+            .faculty-public-name {
+              margin: 0;
+              color: #fff;
+              font-size: clamp(22px, 3vw, 30px);
+              line-height: 1.08;
+              letter-spacing: -.03em;
+            }
+            .faculty-public-meta {
+              display: grid;
+              gap: 8px;
+              margin-top: 14px;
+              color: rgba(255,255,255,.72);
+              font-size: 13px;
+              line-height: 1.5;
+            }
+            .faculty-public-bio {
+              margin: 15px 0 0;
+              color: rgba(255,255,255,.78);
+              font-size: 14px;
+              line-height: 1.65;
+            }
+            .faculty-empty-public {
+              padding: 28px;
+              border: 1px dashed rgba(255,255,255,.16);
+              border-radius: 24px;
+              color: rgba(255,255,255,.72);
+              background: rgba(255,255,255,.04);
+            }
+            @media (max-width: 960px) {
+              .faculty-public-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            }
+            @media (max-width: 640px) {
+              .faculty-public-grid { grid-template-columns: 1fr; }
+            }
+          `}</style>
+
+          {publishedFaculty.length > 0 ? (
+            <div className="faculty-public-grid">
+              {publishedFaculty.map((item) => {
+                const initials = String(item.name || 'EV')
+                  .split(/\s+/)
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((part) => part[0])
+                  .join('')
+                  .toUpperCase();
+
+                return (
+                  <article className="faculty-public-card" key={item.id}>
+                    <div className="faculty-public-photo">
+                      {item.imageUrl ? (
+                        <img src={String(item.imageUrl).replace(/\"/g, '')} alt={item.name || 'EZEE VISION educator'} loading="lazy" />
+                      ) : (
+                        <div className="faculty-fallback">{initials || 'EV'}</div>
+                      )}
+                    </div>
+                    <div className="faculty-public-copy">
+                      <div className="faculty-public-role">{item.role || 'Educator'}</div>
+                      <h3 className="faculty-public-name">{item.name || 'EZEE VISION Educator'}</h3>
+                      <div className="faculty-public-meta">
+                        {item.qualification ? <span><b>Qualification:</b> {item.qualification}</span> : null}
+                        {item.subjects ? <span><b>Subjects:</b> {item.subjects}</span> : null}
+                        {item.experience ? <span><b>Experience:</b> {item.experience}</span> : null}
+                      </div>
+                      {item.bio ? <p className="faculty-public-bio">{item.bio}</p> : null}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="faculty-public-grid">
+              <article className="faculty-public-card">
+                <div className="faculty-public-photo"><div className="faculty-fallback">SS</div></div>
+                <div className="faculty-public-copy">
+                  <div className="faculty-public-role">Founder • Educator</div>
+                  <h3 className="faculty-public-name">Sayeedur Rahman (Shahid)</h3>
+                  <div className="faculty-public-meta"><span><b>Role:</b> Teacher • Content Creator • Educator</span></div>
+                  <p className="faculty-public-bio">Teaching with clarity, structure and a human touch. Add more faculty profiles from the Admin Faculty Manager.</p>
+                </div>
+              </article>
+            </div>
+          )}
         </div>
       </section>
 
