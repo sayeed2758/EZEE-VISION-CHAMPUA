@@ -883,49 +883,276 @@ export default function Home() {
         </header>
       </div>
 
-      <section id="home" className="hero section-anchor">
-        <div className="hero-glow glow-a"></div>
-        <div className="hero-glow glow-b"></div>
-        <div className="shell hero-grid">
-          <div className="hero-copy">
-            <div className="eyebrow"><span className="dot"></span> {profile.classSupportText}</div>
-            <h1>{profile.heroTitleLine1}<br /><span>{profile.heroTitleLine2}</span></h1>
-            <p className="hero-text">
-              {profile.heroText}
-            </p>
-            <div className="hero-actions">
-              <button className="btn btn-primary btn-lg" onClick={openAdmission}>Get Admission Info <span>→</span></button>
-              <button className="btn btn-ghost btn-lg" onClick={() => goTo('classes')}>Explore Classes <span>↘</span></button>
-            </div>
-            <div className="hero-note">
-              <span className="mini-people"><i>4</i><i>1</i><i>2</i></span>
-              <span><b>Nearly {profile.studentCount} students</b> have joined the journey in the first {profile.journeyMonths} months.</span>
-            </div>
+
+      <style>{`
+        .ev-home-hero {
+          position: relative;
+          overflow: hidden;
+          background:
+            linear-gradient(rgba(0, 160, 95, .095) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 160, 95, .095) 1px, transparent 1px),
+            linear-gradient(180deg, #effff7 0%, #e6fff2 100%);
+          background-size: 54px 54px, 54px 54px, 100% 100%;
+          padding: clamp(32px, 7vw, 72px) 18px 0;
+          scroll-margin-top: 120px;
+          min-height: auto;
+          isolation: isolate;
+        }
+        .ev-home-shell {
+          width: min(1180px, 100%);
+          margin: 0 auto;
+          text-align: center;
+        }
+        .ev-home-kicker {
+          margin: 0 auto 14px;
+          color: #009b5f;
+          font-size: clamp(30px, 8vw, 72px);
+          line-height: .98;
+          font-weight: 900;
+          letter-spacing: -.055em;
+          max-width: 920px;
+          text-wrap: balance;
+        }
+        .ev-home-subheadline {
+          width: min(920px, 100%);
+          margin: 0 auto;
+          color: #101923;
+          font-size: clamp(15px, 2.4vw, 22px);
+          line-height: 1.55;
+          font-weight: 560;
+          letter-spacing: .015em;
+          text-wrap: balance;
+        }
+        .ev-home-actions {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 14px;
+          margin: 24px auto 0;
+        }
+        .ev-home-action {
+          min-width: 178px;
+          min-height: 54px;
+          padding: 0 28px;
+          border-radius: 16px;
+          border: 1.5px solid #05aa6b;
+          font-size: 16px;
+          font-weight: 850;
+          letter-spacing: -.01em;
+          cursor: pointer;
+          -webkit-tap-highlight-color: transparent;
+          transition: transform .16s ease, opacity .16s ease, box-shadow .16s ease;
+        }
+        .ev-home-action-primary {
+          color: #fff;
+          background: linear-gradient(145deg, #08bd75 0%, #00a864 55%, #009457 100%);
+          box-shadow: 0 13px 24px rgba(0, 153, 88, .18), inset 0 1px 0 rgba(255,255,255,.25), inset 0 -3px 0 rgba(0,0,0,.09);
+        }
+        .ev-home-action-secondary {
+          color: #0a261c;
+          background: rgba(255,255,255,.88);
+          box-shadow: 0 9px 18px rgba(0, 105, 66, .06), inset 0 1px 0 rgba(255,255,255,.92);
+        }
+        .ev-home-action:active {
+          transform: translateY(2px) scale(.99);
+          opacity: .78;
+        }
+        .ev-teachers-stage {
+          position: relative;
+          width: min(930px, 100%);
+          margin: 18px auto 0;
+          height: clamp(290px, 45vw, 560px);
+          overflow: hidden;
+        }
+        .ev-teachers-stage::before {
+          content: '';
+          position: absolute;
+          width: min(540px, 78vw);
+          height: min(540px, 78vw);
+          left: 50%;
+          bottom: -36%;
+          transform: translateX(-50%);
+          border-radius: 48%;
+          background: radial-gradient(circle, rgba(8, 190, 113, .19) 0%, rgba(8, 190, 113, .07) 54%, rgba(8, 190, 113, 0) 72%);
+          pointer-events: none;
+        }
+        .ev-green-element {
+          position: absolute;
+          pointer-events: none;
+          filter: drop-shadow(0 10px 18px rgba(0,122,70,.10));
+        }
+        .ev-green-diamond {
+          width: 150px;
+          height: 240px;
+          left: 50%;
+          bottom: 25px;
+          transform: translateX(-50%) rotate(45deg);
+          border-radius: 22px;
+          background: linear-gradient(160deg, #00c977 0%, #06aa66 64%, #058d56 100%);
+          opacity: .95;
+        }
+        .ev-green-ring {
+          width: 250px;
+          height: 250px;
+          left: 50%;
+          bottom: -60px;
+          transform: translateX(-50%);
+          border-radius: 50%;
+          border: 18px solid rgba(0, 178, 103, .18);
+        }
+        .ev-green-block-left,
+        .ev-green-block-right {
+          width: 92px;
+          height: 170px;
+          bottom: 66px;
+          border-radius: 28px;
+          background: linear-gradient(180deg, rgba(0, 198, 118, .92), rgba(0, 149, 87, .75));
+        }
+        .ev-green-block-left { left: 10%; transform: rotate(-13deg); }
+        .ev-green-block-right { right: 10%; transform: rotate(13deg); }
+        .ev-teacher {
+          position: absolute;
+          bottom: 0;
+          display: block;
+          width: auto;
+          user-select: none;
+          -webkit-user-select: none;
+          pointer-events: none;
+          object-fit: contain;
+          filter: drop-shadow(0 16px 28px rgba(0, 73, 43, .19));
+        }
+        .ev-teacher-left {
+          left: 5%;
+          height: 87%;
+          z-index: 2;
+        }
+        .ev-teacher-center {
+          left: 50%;
+          transform: translateX(-50%);
+          height: 98%;
+          z-index: 4;
+        }
+        .ev-teacher-right {
+          right: 4%;
+          height: 82%;
+          z-index: 3;
+        }
+        .ev-scholarship-bar {
+          position: relative;
+          width: calc(100% + 36px);
+          margin: 0 -18px;
+          overflow: hidden;
+          background: repeating-linear-gradient(
+            -45deg,
+            #087a4b 0,
+            #087a4b 13px,
+            #096f45 13px,
+            #096f45 26px
+          );
+          border-top: 1px solid rgba(255,255,255,.15);
+          border-bottom: 1px solid rgba(0,0,0,.10);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 -5px 16px rgba(0, 91, 53, .08);
+        }
+        .ev-scholarship-track {
+          display: flex;
+          width: max-content;
+          min-width: 100%;
+          animation: evScholarshipMove 18s linear infinite;
+        }
+        .ev-scholarship-text {
+          flex: 0 0 auto;
+          padding: 15px 34px;
+          color: #fff;
+          font-size: clamp(14px, 2.2vw, 21px);
+          line-height: 1.2;
+          font-weight: 900;
+          letter-spacing: .01em;
+          white-space: nowrap;
+          text-shadow: 0 2px 6px rgba(0,0,0,.14);
+        }
+        @keyframes evScholarshipMove {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        @media (max-width: 720px) {
+          .ev-home-hero {
+            padding: 28px 12px 0;
+          }
+          .ev-home-kicker {
+            font-size: clamp(30px, 9vw, 52px);
+            max-width: 100%;
+          }
+          .ev-home-subheadline {
+            font-size: clamp(14px, 4vw, 18px);
+            line-height: 1.52;
+          }
+          .ev-home-actions {
+            gap: 10px;
+            margin-top: 20px;
+          }
+          .ev-home-action {
+            min-width: 0;
+            flex: 1 1 155px;
+            min-height: 50px;
+            padding: 0 16px;
+            border-radius: 14px;
+            font-size: 14px;
+          }
+          .ev-teachers-stage {
+            height: 300px;
+            margin-top: 10px;
+          }
+          .ev-teacher-left { left: -1%; height: 76%; }
+          .ev-teacher-center { height: 95%; }
+          .ev-teacher-right { right: -1%; height: 71%; }
+          .ev-green-diamond { width: 112px; height: 190px; bottom: 18px; }
+          .ev-green-ring { width: 180px; height: 180px; bottom: -34px; border-width: 13px; }
+          .ev-green-block-left, .ev-green-block-right { width: 58px; height: 118px; bottom: 47px; }
+          .ev-scholarship-bar { width: calc(100% + 24px); margin: 0 -12px; }
+          .ev-scholarship-text { padding: 13px 26px; font-size: 14px; }
+        }
+        @media (max-width: 390px) {
+          .ev-home-kicker { font-size: 29px; }
+          .ev-home-subheadline { font-size: 13px; }
+          .ev-home-action { flex-basis: 145px; font-size: 13px; min-height: 47px; }
+          .ev-teachers-stage { height: 270px; }
+          .ev-teacher-left { left: -7%; height: 73%; }
+          .ev-teacher-center { height: 94%; }
+          .ev-teacher-right { right: -8%; height: 68%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ev-scholarship-track { animation-duration: 32s; }
+        }
+      `}</style>
+      <section id="home" className="ev-home-hero section-anchor">
+        <div className="ev-home-shell">
+          <h1 className="ev-home-kicker">Your Trusted Offline Coaching for Class 4th to 12th</h1>
+          <p className="ev-home-subheadline">Building strong concepts from School foundations to Board Exam Success through dedicated Smart classroom teaching, Fully Air Conditioned Classroom, Live CCTV Monitoring with Personal attention, and regular Test series.</p>
+
+          <div className="ev-home-actions">
+            <button className="ev-home-action ev-home-action-primary" type="button" onClick={openAdmission}>Register Now</button>
+            <button className="ev-home-action ev-home-action-secondary" type="button" onClick={() => goTo('classes')}>Explore Classes</button>
           </div>
 
-          <div className="hero-visual" aria-label="EZEE VISION CHAMPUA learning visual">
-            <div className="visual-card visual-main">
-              <div className="visual-top">
-                <span>{profile.brandName}</span>
-                <span className="status-pill">LEARN • PRACTISE • GROW</span>
-              </div>
-              <div className="visual-content">
-                <div className="board-lines">
-                  <span>UNDERSTAND</span>
-                  <span>PRACTISE</span>
-                  <span>IMPROVE</span>
-                </div>
-                <div className="figure-wrap">
-                  <div className="figure-head"></div>
-                  <div className="figure-body"></div>
-                  <div className="figure-card">{profile.classRange}</div>
-                </div>
-              </div>
-              <div className="visual-footer"><span>Student-focused coaching</span><span>{profile.locationLabel}</span></div>
+          <div className="ev-teachers-stage" aria-label="EZEE VISION CHAMPUA teaching team">
+            <div className="ev-green-element ev-green-diamond" aria-hidden="true"></div>
+            <div className="ev-green-element ev-green-ring" aria-hidden="true"></div>
+            <div className="ev-green-element ev-green-block-left" aria-hidden="true"></div>
+            <div className="ev-green-element ev-green-block-right" aria-hidden="true"></div>
+
+            <img className="ev-teacher ev-teacher-left" src="/teachers/teacher-1.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
+            <img className="ev-teacher ev-teacher-center" src="/teachers/teacher-2.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
+            <img className="ev-teacher ev-teacher-right" src="/teachers/teacher-3.png" alt="EZEE VISION CHAMPUA teacher" draggable="false" />
+          </div>
+
+          <div className="ev-scholarship-bar" aria-label="Scholarship announcement">
+            <div className="ev-scholarship-track">
+              <div className="ev-scholarship-text">Get Upto 100% Scholarship with Our Dedicated Scholarship Test</div>
+              <div className="ev-scholarship-text">Get Upto 100% Scholarship with Our Dedicated Scholarship Test</div>
+              <div className="ev-scholarship-text">Get Upto 100% Scholarship with Our Dedicated Scholarship Test</div>
+              <div className="ev-scholarship-text">Get Upto 100% Scholarship with Our Dedicated Scholarship Test</div>
             </div>
-            <div className="floating-stat stat-one"><b>{profile.studentCount}</b><span>students</span></div>
-            <div className="floating-stat stat-two"><b>{profile.journeyMonths} mo.</b><span>journey</span></div>
-            <div className="floating-chip">FOCUSED LEARNING</div>
           </div>
         </div>
       </section>
@@ -1825,7 +2052,6 @@ export default function Home() {
             </form>
             </div>
           </div>
-        </div>
         </div>
       ) : null}
     </main>
