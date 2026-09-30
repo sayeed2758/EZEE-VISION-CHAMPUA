@@ -633,56 +633,52 @@ export default function Home() {
         .ev-enquiry-overlay {
           position: fixed;
           inset: 0;
-          z-index: 100;
+          z-index: 1000;
           display: grid;
           place-items: center;
-          padding: 14px;
-          background: rgba(0, 0, 0, .63);
-          backdrop-filter: blur(3.5px);
-          -webkit-backdrop-filter: blur(3.5px);
+          padding: 18px 0 24px;
+          background: rgba(0, 0, 0, .72);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
           overscroll-behavior: contain;
         }
         .ev-enquiry-stage {
           position: relative;
-          width: min(580px, 82.8vw);
+          width: min(580px, calc(100vw - 46px));
         }
         .ev-enquiry-modal {
-          position: relative;
           width: 100%;
-          height: min(64vh, 860px);
+          height: 64vh;
           max-height: 860px;
-          min-height: 0;
+          min-height: 480px;
           overflow: hidden;
-          border: 1px solid rgba(23, 40, 66, .12);
-          border-radius: 10px;
+          border: 1px solid rgba(10, 52, 108, .12);
+          border-radius: 18px;
           background: #fff;
-          box-shadow: 0 32px 82px rgba(0,0,0,.34), 0 10px 30px rgba(0,0,0,.18);
-          display: flex;
-          flex-direction: column;
+          box-shadow: 0 34px 90px rgba(0,0,0,.40), 0 10px 28px rgba(4,47,105,.18);
         }
         .ev-enquiry-banner-wrap {
-          position: relative;
           width: 100%;
-          flex: 0 0 auto;
           overflow: hidden;
-          border-radius: 10px 10px 0 0;
+          border-radius: 18px 18px 0 0;
           background: #061c3f;
         }
         .ev-enquiry-banner {
           width: 100%;
           display: block;
-          aspect-ratio: 3.65 / 1;
+          aspect-ratio: 3.35 / 1;
           object-fit: cover;
           object-position: center;
         }
         .ev-enquiry-close {
           position: absolute;
-          top: clamp(-96px, -7vh, -64px);
-          right: 2px;
-          width: 38px;
-          height: 38px;
+          top: -54px;
+          right: 6px;
+          width: 42px;
+          height: 42px;
           display: grid;
           place-items: center;
+          padding: 0;
           border: 0;
           background: transparent;
           color: #fff;
@@ -691,109 +687,119 @@ export default function Home() {
           line-height: 1;
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
-          text-shadow: 0 2px 10px rgba(0,0,0,.65);
+          text-shadow: 0 2px 12px rgba(0,0,0,.58);
         }
-        .ev-enquiry-close:active { transform: scale(.90); opacity: .72; }
+        .ev-enquiry-close:active { transform: scale(.90); opacity: .74; }
         .ev-enquiry-modal-body {
-          flex: 1 1 auto;
-          min-height: 0;
+          height: calc(64vh - 174px);
+          max-height: calc(860px - 174px);
+          min-height: 306px;
           overflow-y: auto;
-          padding: 40px 35px 34px;
-          background: #fff;
           overscroll-behavior: contain;
-          scrollbar-width: thin;
-          scrollbar-color: rgba(10, 54, 112, .20) transparent;
+          padding: 22px 32px 24px;
+          background: #fff;
         }
         .ev-enquiry-form {
           display: grid;
           gap: 14px;
           margin: 0;
+          padding: 0;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          box-shadow: none;
         }
         .ev-enquiry-form label {
           display: grid;
-          gap: 6px;
-          color: #1d3658;
+          gap: 7px;
+          color: #223a62;
           font-size: 10px;
           font-weight: 900;
           letter-spacing: .08em;
           text-transform: uppercase;
         }
-        .ev-enquiry-form .form-row {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 14px;
-        }
         .ev-enquiry-form input,
         .ev-enquiry-form textarea,
         .ev-enquiry-form select {
           width: 100%;
-          min-height: 70px;
-          padding: 0 28px;
-          border: 1.25px solid rgba(24, 31, 41, .72);
-          border-radius: 9px;
+          min-height: 58px;
+          box-sizing: border-box;
+          padding: 0 16px;
+          border: 1.5px solid #5e6874;
+          border-radius: 10px;
           outline: none;
           background: #fff;
-          color: #172842;
-          font-size: 20px;
+          color: #1d2e49;
+          font-size: 18px;
           font-weight: 500;
           letter-spacing: 0;
           text-transform: none;
           user-select: text;
           -webkit-user-select: text;
-          box-shadow: none;
-          transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.94);
+        }
+        .ev-enquiry-form select {
+          appearance: auto;
+          -webkit-appearance: auto;
+          padding-right: 42px;
         }
         .ev-enquiry-form textarea {
-          min-height: 72px;
-          padding-top: 18px;
-          padding-bottom: 18px;
-          resize: none;
-          line-height: 1.3;
+          min-height: 74px;
+          padding-top: 13px;
+          padding-bottom: 13px;
+          resize: vertical;
+          line-height: 1.35;
         }
         .ev-enquiry-form input::placeholder,
         .ev-enquiry-form textarea::placeholder {
-          color: #737b87;
+          color: #737d8a;
           opacity: 1;
           font-weight: 500;
         }
         .ev-enquiry-form input:focus,
         .ev-enquiry-form textarea:focus,
         .ev-enquiry-form select:focus {
-          border-color: #153d73;
-          box-shadow: 0 0 0 3px rgba(21,61,115,.08);
+          border-color: #0b5cbb;
+          box-shadow: 0 0 0 3px rgba(11,92,187,.10);
         }
         .ev-enquiry-form > .btn,
         .ev-enquiry-form button[type='submit'] {
           width: 100%;
-          min-height: 76px;
+          min-height: 60px;
           margin-top: 2px;
-          border-radius: 9px;
-          background: linear-gradient(145deg, #0b4c84 0%, #063d72 56%, #043461 100%);
-          box-shadow: 0 8px 20px rgba(5, 48, 93, .18), inset 0 1px 0 rgba(255,255,255,.15), inset 0 -3px 0 rgba(0,0,0,.12);
+          border: 0;
+          border-radius: 10px;
+          background: linear-gradient(145deg, #084b88 0%, #063b6d 52%, #052f58 100%);
+          box-shadow: 0 10px 22px rgba(5,48,93,.24), inset 0 1px 0 rgba(255,255,255,.15), inset 0 -3px 0 rgba(0,0,0,.16);
           color: #fff;
-          font-size: 20px;
+          font-size: 18px;
           font-weight: 800;
-          letter-spacing: 0;
+          letter-spacing: .01em;
+          cursor: pointer;
+          -webkit-tap-highlight-color: transparent;
         }
         .ev-enquiry-form > .btn:active,
-        .ev-enquiry-form button[type='submit']:active { transform: translateY(2px); opacity: .82; }
-        .ev-enquiry-form .form-note { font-size: 9px; line-height: 1.35; }
+        .ev-enquiry-form button[type='submit']:active { transform: translateY(2px); opacity: .84; }
+        .ev-enquiry-form .form-note { font-size: 10px; line-height: 1.35; }
         @media (max-width: 560px) {
-          .ev-enquiry-overlay { padding: 10px; }
-          .ev-enquiry-stage { width: min(580px, 82.8vw); }
-          .ev-enquiry-modal { height: min(64vh, 860px); border-radius: 10px; }
-          .ev-enquiry-banner-wrap { border-radius: 10px 10px 0 0; }
-          .ev-enquiry-close { top: clamp(-88px, -7vh, -58px); right: 0; width: 36px; height: 36px; font-size: 34px; }
-          .ev-enquiry-modal-body { padding: 32px 35px 28px; }
-          .ev-enquiry-form { gap: 11px; }
-          .ev-enquiry-form .form-row { gap: 11px; }
-          .ev-enquiry-form label { font-size: 9px; gap: 5px; }
+          .ev-enquiry-overlay { padding: 20px 0 24px; }
+          .ev-enquiry-stage { width: min(580px, calc(100vw - 28px)); }
+          .ev-enquiry-modal { height: 64vh; min-height: 470px; border-radius: 18px; }
+          .ev-enquiry-banner-wrap { border-radius: 18px 18px 0 0; }
+          .ev-enquiry-close { top: -48px; right: 2px; width: 38px; height: 38px; font-size: 34px; }
+          .ev-enquiry-modal-body { height: calc(64vh - 154px); min-height: 316px; padding: 18px 24px 22px; }
+          .ev-enquiry-form { gap: 12px; }
+          .ev-enquiry-form label { font-size: 9px; gap: 6px; }
           .ev-enquiry-form input,
           .ev-enquiry-form textarea,
-          .ev-enquiry-form select { min-height: 66px; padding-left: 18px; padding-right: 18px; font-size: 17px; border-radius: 8px; }
-          .ev-enquiry-form textarea { min-height: 70px; padding-top: 15px; padding-bottom: 15px; }
+          .ev-enquiry-form select { min-height: 55px; font-size: 17px; padding-left: 14px; padding-right: 14px; }
+          .ev-enquiry-form textarea { min-height: 68px; }
           .ev-enquiry-form > .btn,
-          .ev-enquiry-form button[type='submit'] { min-height: 70px; font-size: 18px; border-radius: 8px; }
+          .ev-enquiry-form button[type='submit'] { min-height: 56px; font-size: 17px; }
+        }
+        @media (max-width: 390px) {
+          .ev-enquiry-stage { width: calc(100vw - 18px); }
+          .ev-enquiry-modal-body { padding-left: 17px; padding-right: 17px; }
         }
       `}</style>
 
@@ -1848,7 +1854,7 @@ export default function Home() {
             const phone = enquiryForm.phone.trim();
             const message = enquiryForm.message.trim();
             if (!studentName || !parentName || !className || !phone) {
-              setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parents Name, Phone Number and Select Course.' });
+              setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parent / Guardian Name, Class and Phone.' });
               return;
             }
             if (!/^[0-9+()\-\s]{10,18}$/.test(phone)) {
@@ -1879,10 +1885,10 @@ export default function Home() {
           }} noValidate>
             <div className="form-title">Admission Enquiry</div>
             <label>Student Name<input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Enter student name" autoComplete="name" /></label>
-            <label>Parents Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parent or guardian name" autoComplete="name" /></label>
+            <label>Parent / Guardian Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parent or guardian name" autoComplete="name" /></label>
             <div className="form-row">
-              <label>Select Course<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>Select Course</option>{['4th','5th','6th','7th','8th','9th','10th','11th','12th'].map((c) => <option key={c}>{c}</option>)}</select></label>
-              <label>Phone Number<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
+              <label>Class<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>Select class</option>{['4','5','6','7','8','9','10','11','12'].map((c) => <option key={c}>{c}</option>)}</select></label>
+              <label>Phone<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
             </div>
             <label>Message<textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Tell us what you would like to know..."></textarea></label>
             <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
@@ -1970,57 +1976,75 @@ export default function Home() {
                   alt="EZEE VISION CHAMPUA admission banner"
                 />
               </div>
-            <div className="ev-enquiry-modal-body">
-            <form className="enquiry-form ev-enquiry-form" onSubmit={async (e) => {
-              e.preventDefault();
-              if (enquiryState.busy) return;
-              if (enquiryForm.website) return;
-              const studentName = enquiryForm.studentName.trim();
-              const parentName = enquiryForm.parentName.trim();
-              const className = enquiryForm.className.trim();
-              const phone = enquiryForm.phone.trim();
-              const message = enquiryForm.message.trim();
-              if (!studentName || !parentName || !className || !phone) {
-                setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parents Name, Phone Number and Select Course.' });
-                return;
-              }
-              if (!/^[0-9+()\-\s]{10,18}$/.test(phone)) {
-                setEnquiryState({ busy: false, type: 'error', text: 'Please enter a valid phone number.' });
-                return;
-              }
-              if (!firebaseConfigured || !db) {
-                setEnquiryState({ busy: false, type: 'error', text: 'Enquiry service is temporarily unavailable. Please call or WhatsApp us.' });
-                return;
-              }
-              setEnquiryState({ busy: true, type: '', text: '' });
-              try {
-                await addDoc(collection(db, 'enquiries'), {
-                  studentName,
-                  parentName,
-                  className,
-                  phone,
-                  message,
-                  createdAt: serverTimestamp(),
-                  source: 'website-header',
-                  status: 'new'
-                });
-                setEnquiryForm({ studentName: '', parentName: '', className: '', phone: '', message: '', website: '' });
-                setEnquiryState({ busy: false, type: 'success', text: 'Thank you. Your admission enquiry has been received.' });
-              } catch (error) {
-                setEnquiryState({ busy: false, type: 'error', text: error?.message || 'Unable to submit your enquiry right now. Please use Call or WhatsApp.' });
-              }
-            }} noValidate>
-              <label>Student Name<input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Name" autoComplete="name" /></label>
-              <label>Parents Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Parents name" autoComplete="name" /></label>
-              <label>Phone Number<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="PHONE NUMBER" inputMode="tel" autoComplete="tel" /></label>
-              <label>Select Course (4th to 12th)<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>Select Course</option>{['4th','5th','6th','7th','8th','9th','10th','11th','12th'].map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
-              <label>Message<textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Message (optional)"></textarea></label>
-              {enquiryState.text ? <div className={enquiryState.type === 'error' ? 'form-note form-note-error' : 'form-note form-note-success'} role="status">{enquiryState.text}</div> : null}
-              <button className="btn btn-primary btn-lg" type="submit" disabled={enquiryState.busy}>{enquiryState.busy ? 'Submitting…' : <>Submit Enquiry <span>→</span></>}</button>
-              <small className="form-note">Your details are used only to respond to this admission enquiry.</small>
-            </form>
+
+              <div className="ev-enquiry-modal-body">
+                <form className="ev-enquiry-form" onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (enquiryState.busy) return;
+                  if (enquiryForm.website) return;
+                  const studentName = enquiryForm.studentName.trim();
+                  const parentName = enquiryForm.parentName.trim();
+                  const className = enquiryForm.className.trim();
+                  const phone = enquiryForm.phone.trim();
+                  const message = enquiryForm.message.trim();
+                  if (!studentName || !parentName || !className || !phone) {
+                    setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parents Name, Class and Phone Number.' });
+                    return;
+                  }
+                  if (!/^[0-9+()\-\s]{10,18}$/.test(phone)) {
+                    setEnquiryState({ busy: false, type: 'error', text: 'Please enter a valid phone number.' });
+                    return;
+                  }
+                  if (!firebaseConfigured || !db) {
+                    setEnquiryState({ busy: false, type: 'error', text: 'Enquiry service is temporarily unavailable. Please call or WhatsApp us.' });
+                    return;
+                  }
+                  setEnquiryState({ busy: true, type: '', text: '' });
+                  try {
+                    await addDoc(collection(db, 'enquiries'), {
+                      studentName,
+                      parentName,
+                      className,
+                      phone,
+                      message,
+                      createdAt: serverTimestamp(),
+                      source: 'website-header',
+                      status: 'new'
+                    });
+                    setEnquiryForm({ studentName: '', parentName: '', className: '', phone: '', message: '', website: '' });
+                    setEnquiryState({ busy: false, type: 'success', text: 'Thank you. Your admission enquiry has been received.' });
+                  } catch (error) {
+                    setEnquiryState({ busy: false, type: 'error', text: error?.message || 'Unable to submit your enquiry right now. Please use Call or WhatsApp.' });
+                  }
+                }} noValidate>
+                  <label>Student Name
+                    <input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Name" autoComplete="name" />
+                  </label>
+
+                  <label>Parents Name
+                    <input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Parents name" autoComplete="name" />
+                  </label>
+
+                  <label>Phone Number
+                    <input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="PHONE NUMBER" inputMode="tel" autoComplete="tel" />
+                  </label>
+
+                  <label>Select Course (4th to 12th)
+                    <select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}>
+                      <option value="" disabled>Select Course</option>
+                      {['4','5','6','7','8','9','10','11','12'].map((c) => <option key={c} value={c}>Class {c}</option>)}
+                    </select>
+                  </label>
+
+                  <label>Message
+                    <textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Message (optional)"></textarea>
+                  </label>
+
+                  {enquiryState.text ? <div className={enquiryState.type === 'error' ? 'form-note form-note-error' : 'form-note form-note-success'} role="status">{enquiryState.text}</div> : null}
+                  <button className="btn btn-primary btn-lg" type="submit" disabled={enquiryState.busy}>{enquiryState.busy ? 'Submitting…' : 'Send Enquiry'}</button>
+                </form>
+              </div>
             </div>
-          </div>
           </div>
         </div>
       ) : null}
