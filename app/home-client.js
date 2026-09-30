@@ -644,12 +644,12 @@ export default function Home() {
         }
         .ev-enquiry-stage {
           position: relative;
-          width: min(520px, calc(100vw - 30px));
+          width: min(580px, calc(100vw - 32px));
         }
         .ev-enquiry-modal {
           position: relative;
           width: 100%;
-          max-height: min(70vh, 610px);
+          max-height: min(860px, calc(100vh - 58px));
           overflow: hidden;
           border: 1px solid rgba(10, 52, 108, .12);
           border-radius: 20px;
@@ -692,7 +692,7 @@ export default function Home() {
         }
         .ev-enquiry-close:active { transform: scale(.90); opacity: .72; }
         .ev-enquiry-modal-body {
-          max-height: calc(min(70vh, 610px) - 174px);
+          max-height: calc(min(860px, calc(100vh - 58px)) - 174px);
           overflow-y: auto;
           padding: 15px 17px 17px;
           background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
@@ -745,8 +745,8 @@ export default function Home() {
         }
         .ev-enquiry-form .form-row {
           display: grid;
-          grid-template-columns: 1fr 1.15fr;
-          gap: 12px;
+          grid-template-columns: 1fr;
+          gap: 8px;
         }
         .ev-enquiry-form input,
         .ev-enquiry-form textarea,
@@ -804,11 +804,11 @@ export default function Home() {
         .ev-enquiry-form .form-note { font-size: 10px; line-height: 1.35; }
         @media (max-width: 560px) {
           .ev-enquiry-overlay { padding: 12px 8px 18px; }
-          .ev-enquiry-stage { width: min(520px, calc(100vw - 16px)); }
-          .ev-enquiry-modal { width: 100%; max-height: 68vh; border-radius: 18px; }
+          .ev-enquiry-stage { width: min(580px, calc(100vw - 32px)); }
+          .ev-enquiry-modal { width: 100%; max-height: min(860px, calc(100vh - 58px)); border-radius: 18px; }
           .ev-enquiry-banner-wrap { border-radius: 18px 18px 0 0; }
           .ev-enquiry-close { top: -40px; right: -1px; width: 34px; height: 34px; font-size: 30px; }
-          .ev-enquiry-modal-body { max-height: calc(68vh - 150px); padding: 13px 13px 15px; }
+          .ev-enquiry-modal-body { max-height: calc(min(860px, calc(100vh - 58px)) - 150px); padding: 13px 13px 15px; }
           .ev-enquiry-modal-label { font-size: 8.5px; margin-bottom: 5px; }
           .ev-enquiry-modal-title { font-size: 21px; }
           .ev-enquiry-modal-subtitle { font-size: 11px; margin: 5px 0 10px; }
@@ -1874,7 +1874,7 @@ export default function Home() {
             const phone = enquiryForm.phone.trim();
             const message = enquiryForm.message.trim();
             if (!studentName || !parentName || !className || !phone) {
-              setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parent / Guardian Name, Class and Phone.' });
+              setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parents Name, Phone Number and Select Course.' });
               return;
             }
             if (!/^[0-9+()\-\s]{10,18}$/.test(phone)) {
@@ -1903,13 +1903,12 @@ export default function Home() {
               setEnquiryState({ busy: false, type: 'error', text: error?.message || 'Unable to submit your enquiry right now. Please use Call or WhatsApp.' });
             }
           }} noValidate>
+
             <div className="form-title">Admission Enquiry</div>
             <label>Student Name<input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Enter student name" autoComplete="name" /></label>
-            <label>Parent / Guardian Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parent or guardian name" autoComplete="name" /></label>
-            <div className="form-row">
-              <label>Class<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>Select class</option>{['4','5','6','7','8','9','10','11','12'].map((c) => <option key={c}>{c}</option>)}</select></label>
-              <label>Phone<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
-            </div>
+            <label>Parents Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parents name" autoComplete="name" /></label>
+            <label>Phone Number<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
+            <label>Select Course (4th to 12th)<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>-Select Course-</option>{['4th','5th','6th','7th','8th','9th','10th','11th','12th'].map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
             <label>Message<textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Tell us what you would like to know..."></textarea></label>
             <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
               <label>Website<input value={enquiryForm.website} onChange={(e) => setEnquiryForm((v) => ({ ...v, website: e.target.value }))} tabIndex={-1} autoComplete="off" /></label>
@@ -1999,7 +1998,7 @@ export default function Home() {
             <div className="ev-enquiry-modal-body">
               <div className="ev-enquiry-modal-label">Admission Enquiry</div>
               <h2 className="ev-enquiry-modal-title">Join EZEE VISION CHAMPUA</h2>
-              <p className="ev-enquiry-modal-subtitle">Share your details and our coaching team will contact you regarding classes, batches and admission information.</p>
+              <p className="ev-enquiry-modal-subtitle">Enter your details and our coaching team will contact you regarding admission information.</p>
             <form className="enquiry-form ev-enquiry-form" onSubmit={async (e) => {
               e.preventDefault();
               if (enquiryState.busy) return;
@@ -2010,7 +2009,7 @@ export default function Home() {
               const phone = enquiryForm.phone.trim();
               const message = enquiryForm.message.trim();
               if (!studentName || !parentName || !className || !phone) {
-                setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parent / Guardian Name, Class and Phone.' });
+                setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parents Name, Phone Number and Select Course.' });
                 return;
               }
               if (!/^[0-9+()\-\s]{10,18}$/.test(phone)) {
@@ -2039,12 +2038,11 @@ export default function Home() {
                 setEnquiryState({ busy: false, type: 'error', text: error?.message || 'Unable to submit your enquiry right now. Please use Call or WhatsApp.' });
               }
             }} noValidate>
+
               <label>Student Name<input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Enter student name" autoComplete="name" /></label>
-              <label>Parent / Guardian Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parent or guardian name" autoComplete="name" /></label>
-              <div className="form-row">
-                <label>Class<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>Select class</option>{['4','5','6','7','8','9','10','11','12'].map((c) => <option key={c}>{c}</option>)}</select></label>
-                <label>Phone<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
-              </div>
+              <label>Parents Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parents name" autoComplete="name" /></label>
+              <label>Phone Number<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
+              <label>Select Course (4th to 12th)<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>-Select Course-</option>{['4th','5th','6th','7th','8th','9th','10th','11th','12th'].map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
               <label>Message<textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Tell us what you would like to know..."></textarea></label>
               {enquiryState.text ? <div className={enquiryState.type === 'error' ? 'form-note form-note-error' : 'form-note form-note-success'} role="status">{enquiryState.text}</div> : null}
               <button className="btn btn-primary btn-lg" type="submit" disabled={enquiryState.busy}>{enquiryState.busy ? 'Submitting…' : <>Submit Enquiry <span>→</span></>}</button>
