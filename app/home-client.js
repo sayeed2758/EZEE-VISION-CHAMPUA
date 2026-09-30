@@ -636,46 +636,49 @@ export default function Home() {
           z-index: 100;
           display: grid;
           place-items: center;
-          padding: 16px 10px 22px;
-          background: rgba(0, 0, 0, .68);
-          backdrop-filter: blur(3px);
-          -webkit-backdrop-filter: blur(3px);
+          padding: 14px;
+          background: rgba(0, 0, 0, .63);
+          backdrop-filter: blur(3.5px);
+          -webkit-backdrop-filter: blur(3.5px);
           overscroll-behavior: contain;
         }
         .ev-enquiry-stage {
           position: relative;
-          width: min(580px, calc(100vw - 32px));
+          width: min(580px, 82.8vw);
         }
         .ev-enquiry-modal {
           position: relative;
           width: 100%;
-          max-height: min(860px, calc(100vh - 58px));
+          height: min(64vh, 860px);
+          max-height: 860px;
+          min-height: 0;
           overflow: hidden;
-          border: 1px solid rgba(10, 52, 108, .12);
-          border-radius: 20px;
+          border: 1px solid rgba(23, 40, 66, .12);
+          border-radius: 10px;
           background: #fff;
-          box-shadow: 0 36px 90px rgba(0,0,0,.34), 0 10px 26px rgba(4, 47, 105, .12), inset 0 1px 0 rgba(255,255,255,.94);
-          scrollbar-width: thin;
-          scrollbar-color: rgba(10, 54, 112, .24) transparent;
+          box-shadow: 0 32px 82px rgba(0,0,0,.34), 0 10px 30px rgba(0,0,0,.18);
+          display: flex;
+          flex-direction: column;
         }
         .ev-enquiry-banner-wrap {
           position: relative;
           width: 100%;
+          flex: 0 0 auto;
           overflow: hidden;
-          border-radius: 24px 24px 0 0;
+          border-radius: 10px 10px 0 0;
           background: #061c3f;
         }
         .ev-enquiry-banner {
           width: 100%;
           display: block;
-          aspect-ratio: 3.35 / 1;
+          aspect-ratio: 3.65 / 1;
           object-fit: cover;
           object-position: center;
         }
         .ev-enquiry-close {
           position: absolute;
-          top: -46px;
-          right: 0;
+          top: clamp(-96px, -7vh, -64px);
+          right: 2px;
           width: 38px;
           height: 38px;
           display: grid;
@@ -683,143 +686,114 @@ export default function Home() {
           border: 0;
           background: transparent;
           color: #fff;
-          font-size: 34px;
+          font-size: 36px;
           font-weight: 400;
           line-height: 1;
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
-          text-shadow: 0 2px 10px rgba(0,0,0,.55);
+          text-shadow: 0 2px 10px rgba(0,0,0,.65);
         }
         .ev-enquiry-close:active { transform: scale(.90); opacity: .72; }
         .ev-enquiry-modal-body {
-          max-height: calc(min(860px, calc(100vh - 58px)) - 174px);
+          flex: 1 1 auto;
+          min-height: 0;
           overflow-y: auto;
-          padding: 15px 17px 17px;
-          background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
+          padding: 40px 35px 34px;
+          background: #fff;
           overscroll-behavior: contain;
-        }
-        .ev-enquiry-modal-label {
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
-          margin-bottom: 6px;
-          color: #0b5cbb;
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .18em;
-          text-transform: uppercase;
-        }
-        .ev-enquiry-modal-label::before {
-          content: '';
-          width: 18px;
-          height: 2.5px;
-          border-radius: 999px;
-          background: linear-gradient(90deg, #0b5cbb, #1d8bff);
-        }
-        .ev-enquiry-modal-title {
-          margin: 0;
-          color: #0a1c3d;
-          font-size: clamp(19px, 3.1vw, 23px);
-          line-height: 1.04;
-          letter-spacing: -.045em;
-        }
-        .ev-enquiry-modal-subtitle {
-          margin: 6px 0 12px;
-          color: #63748f;
-          font-size: 12px;
-          line-height: 1.42;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(10, 54, 112, .20) transparent;
         }
         .ev-enquiry-form {
           display: grid;
-          gap: 8px;
+          gap: 14px;
           margin: 0;
         }
         .ev-enquiry-form label {
           display: grid;
-          gap: 5px;
-          color: #223a62;
-          font-size: 9px;
+          gap: 6px;
+          color: #1d3658;
+          font-size: 10px;
           font-weight: 900;
-          letter-spacing: .07em;
+          letter-spacing: .08em;
           text-transform: uppercase;
         }
         .ev-enquiry-form .form-row {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 8px;
+          gap: 14px;
         }
         .ev-enquiry-form input,
         .ev-enquiry-form textarea,
         .ev-enquiry-form select {
           width: 100%;
-          min-height: 42px;
-          padding: 0 11px;
-          border: 1.5px solid rgba(18, 34, 58, .40);
-          border-radius: 10px;
+          min-height: 70px;
+          padding: 0 28px;
+          border: 1.25px solid rgba(24, 31, 41, .72);
+          border-radius: 9px;
           outline: none;
           background: #fff;
           color: #172842;
-          font-size: 14px;
-          font-weight: 600;
+          font-size: 20px;
+          font-weight: 500;
           letter-spacing: 0;
           text-transform: none;
           user-select: text;
           -webkit-user-select: text;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.92), 0 2px 7px rgba(8, 33, 73, .03);
+          box-shadow: none;
           transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
         }
         .ev-enquiry-form textarea {
-          min-height: 62px;
-          padding-top: 10px;
-          padding-bottom: 10px;
-          resize: vertical;
+          min-height: 72px;
+          padding-top: 18px;
+          padding-bottom: 18px;
+          resize: none;
+          line-height: 1.3;
         }
         .ev-enquiry-form input::placeholder,
         .ev-enquiry-form textarea::placeholder {
-          color: #7b8799;
+          color: #737b87;
           opacity: 1;
           font-weight: 500;
         }
         .ev-enquiry-form input:focus,
         .ev-enquiry-form textarea:focus,
         .ev-enquiry-form select:focus {
-          border-color: #1769d2;
-          box-shadow: 0 0 0 3px rgba(23, 105, 210, .10), inset 0 1px 0 rgba(255,255,255,.95);
+          border-color: #153d73;
+          box-shadow: 0 0 0 3px rgba(21,61,115,.08);
         }
         .ev-enquiry-form > .btn,
         .ev-enquiry-form button[type='submit'] {
           width: 100%;
-          min-height: 44px;
+          min-height: 76px;
           margin-top: 2px;
-          border-radius: 10px;
-          background: linear-gradient(145deg, #0c4a85 0%, #063665 55%, #052d59 100%);
-          box-shadow: 0 10px 20px rgba(5, 48, 93, .22), inset 0 1px 0 rgba(255,255,255,.16), inset 0 -3px 0 rgba(0,0,0,.15);
+          border-radius: 9px;
+          background: linear-gradient(145deg, #0b4c84 0%, #063d72 56%, #043461 100%);
+          box-shadow: 0 8px 20px rgba(5, 48, 93, .18), inset 0 1px 0 rgba(255,255,255,.15), inset 0 -3px 0 rgba(0,0,0,.12);
           color: #fff;
-          font-size: 14px;
-          font-weight: 900;
-          letter-spacing: .01em;
+          font-size: 20px;
+          font-weight: 800;
+          letter-spacing: 0;
         }
         .ev-enquiry-form > .btn:active,
         .ev-enquiry-form button[type='submit']:active { transform: translateY(2px); opacity: .82; }
-        .ev-enquiry-form .form-note { font-size: 10px; line-height: 1.35; }
+        .ev-enquiry-form .form-note { font-size: 9px; line-height: 1.35; }
         @media (max-width: 560px) {
-          .ev-enquiry-overlay { padding: 12px 8px 18px; }
-          .ev-enquiry-stage { width: min(580px, calc(100vw - 32px)); }
-          .ev-enquiry-modal { width: 100%; max-height: min(860px, calc(100vh - 58px)); border-radius: 18px; }
-          .ev-enquiry-banner-wrap { border-radius: 18px 18px 0 0; }
-          .ev-enquiry-close { top: -40px; right: -1px; width: 34px; height: 34px; font-size: 30px; }
-          .ev-enquiry-modal-body { max-height: calc(min(860px, calc(100vh - 58px)) - 150px); padding: 13px 13px 15px; }
-          .ev-enquiry-modal-label { font-size: 8.5px; margin-bottom: 5px; }
-          .ev-enquiry-modal-title { font-size: 21px; }
-          .ev-enquiry-modal-subtitle { font-size: 11px; margin: 5px 0 10px; }
-          .ev-enquiry-form { gap: 8px; }
-          .ev-enquiry-form .form-row { grid-template-columns: 1fr; gap: 8px; }
+          .ev-enquiry-overlay { padding: 10px; }
+          .ev-enquiry-stage { width: min(580px, 82.8vw); }
+          .ev-enquiry-modal { height: min(64vh, 860px); border-radius: 10px; }
+          .ev-enquiry-banner-wrap { border-radius: 10px 10px 0 0; }
+          .ev-enquiry-close { top: clamp(-88px, -7vh, -58px); right: 0; width: 36px; height: 36px; font-size: 34px; }
+          .ev-enquiry-modal-body { padding: 32px 35px 28px; }
+          .ev-enquiry-form { gap: 11px; }
+          .ev-enquiry-form .form-row { gap: 11px; }
+          .ev-enquiry-form label { font-size: 9px; gap: 5px; }
           .ev-enquiry-form input,
           .ev-enquiry-form textarea,
-          .ev-enquiry-form select { min-height: 42px; font-size: 13px; padding-left: 10px; padding-right: 10px; }
-          .ev-enquiry-form textarea { min-height: 60px; }
+          .ev-enquiry-form select { min-height: 66px; padding-left: 18px; padding-right: 18px; font-size: 17px; border-radius: 8px; }
+          .ev-enquiry-form textarea { min-height: 70px; padding-top: 15px; padding-bottom: 15px; }
           .ev-enquiry-form > .btn,
-          .ev-enquiry-form button[type='submit'] { min-height: 43px; font-size: 13px; }
+          .ev-enquiry-form button[type='submit'] { min-height: 70px; font-size: 18px; border-radius: 8px; }
         }
       `}</style>
 
@@ -1903,12 +1877,13 @@ export default function Home() {
               setEnquiryState({ busy: false, type: 'error', text: error?.message || 'Unable to submit your enquiry right now. Please use Call or WhatsApp.' });
             }
           }} noValidate>
-
             <div className="form-title">Admission Enquiry</div>
             <label>Student Name<input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Enter student name" autoComplete="name" /></label>
-            <label>Parents Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parents name" autoComplete="name" /></label>
-            <label>Phone Number<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
-            <label>Select Course (4th to 12th)<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>-Select Course-</option>{['4th','5th','6th','7th','8th','9th','10th','11th','12th'].map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
+            <label>Parents Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parent or guardian name" autoComplete="name" /></label>
+            <div className="form-row">
+              <label>Select Course<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>Select Course</option>{['4th','5th','6th','7th','8th','9th','10th','11th','12th'].map((c) => <option key={c}>{c}</option>)}</select></label>
+              <label>Phone Number<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
+            </div>
             <label>Message<textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Tell us what you would like to know..."></textarea></label>
             <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
               <label>Website<input value={enquiryForm.website} onChange={(e) => setEnquiryForm((v) => ({ ...v, website: e.target.value }))} tabIndex={-1} autoComplete="off" /></label>
@@ -1996,9 +1971,6 @@ export default function Home() {
                 />
               </div>
             <div className="ev-enquiry-modal-body">
-              <div className="ev-enquiry-modal-label">Admission Enquiry</div>
-              <h2 className="ev-enquiry-modal-title">Join EZEE VISION CHAMPUA</h2>
-              <p className="ev-enquiry-modal-subtitle">Enter your details and our coaching team will contact you regarding admission information.</p>
             <form className="enquiry-form ev-enquiry-form" onSubmit={async (e) => {
               e.preventDefault();
               if (enquiryState.busy) return;
@@ -2038,12 +2010,11 @@ export default function Home() {
                 setEnquiryState({ busy: false, type: 'error', text: error?.message || 'Unable to submit your enquiry right now. Please use Call or WhatsApp.' });
               }
             }} noValidate>
-
-              <label>Student Name<input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Enter student name" autoComplete="name" /></label>
-              <label>Parents Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parents name" autoComplete="name" /></label>
-              <label>Phone Number<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
-              <label>Select Course (4th to 12th)<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>-Select Course-</option>{['4th','5th','6th','7th','8th','9th','10th','11th','12th'].map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
-              <label>Message<textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Tell us what you would like to know..."></textarea></label>
+              <label>Student Name<input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Name" autoComplete="name" /></label>
+              <label>Parents Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Parents name" autoComplete="name" /></label>
+              <label>Phone Number<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="PHONE NUMBER" inputMode="tel" autoComplete="tel" /></label>
+              <label>Select Course (4th to 12th)<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>Select Course</option>{['4th','5th','6th','7th','8th','9th','10th','11th','12th'].map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
+              <label>Message<textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Message (optional)"></textarea></label>
               {enquiryState.text ? <div className={enquiryState.type === 'error' ? 'form-note form-note-error' : 'form-note form-note-success'} role="status">{enquiryState.text}</div> : null}
               <button className="btn btn-primary btn-lg" type="submit" disabled={enquiryState.busy}>{enquiryState.busy ? 'Submitting…' : <>Submit Enquiry <span>→</span></>}</button>
               <small className="form-note">Your details are used only to respond to this admission enquiry.</small>
