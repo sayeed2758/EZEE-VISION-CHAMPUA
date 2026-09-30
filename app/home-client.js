@@ -131,12 +131,38 @@ export default function Home() {
   const [publishedClasses, setPublishedClasses] = useState(classGroups);
   const [publishedResults, setPublishedResults] = useState([]);
   const [publishedTestimonials, setPublishedTestimonials] = useState(testimonials);
+  const [animatedStats, setAnimatedStats] = useState({ years: 0, students: 0, subjects: 0, attention: 0 });
   const [enquiryForm, setEnquiryForm] = useState({ studentName: '', parentName: '', className: '', phone: '', message: '', website: '' });
   const [enquiryState, setEnquiryState] = useState({ busy: false, type: '', text: '' });
 
   useEffect(() => {
     setGalleryIndex(0);
   }, [publishedGallery.length]);
+
+  useEffect(() => {
+    let frameId = 0;
+    const duration = 1500;
+    const targets = { years: 10, students: 1000, subjects: 4, attention: 100 };
+    const start = typeof performance !== 'undefined' ? performance.now() : Date.now();
+
+    const animate = (now) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+
+      setAnimatedStats({
+        years: Math.round(targets.years * eased),
+        students: Math.round(targets.students * eased),
+        subjects: Math.round(targets.subjects * eased),
+        attention: Math.round(targets.attention * eased)
+      });
+
+      if (progress < 1) frameId = requestAnimationFrame(animate);
+    };
+
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, []);
 
   useEffect(() => {
     if (galleryPaused || publishedGallery.length <= 1) return undefined;
@@ -633,34 +659,36 @@ export default function Home() {
         .ev-enquiry-overlay {
           position: fixed;
           inset: 0;
-          z-index: 1000;
+          z-index: 100;
           display: grid;
           place-items: center;
-          padding: 18px 0 24px;
-          background: rgba(0, 0, 0, .72);
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
+          padding: 16px 10px 22px;
+          background: rgba(0, 0, 0, .68);
+          backdrop-filter: blur(3px);
+          -webkit-backdrop-filter: blur(3px);
           overscroll-behavior: contain;
         }
         .ev-enquiry-stage {
           position: relative;
-          width: min(580px, calc(100vw - 46px));
+          width: min(520px, calc(100vw - 30px));
         }
         .ev-enquiry-modal {
+          position: relative;
           width: 100%;
-          height: 64vh;
-          max-height: 860px;
-          min-height: 480px;
+          max-height: min(70vh, 610px);
           overflow: hidden;
           border: 1px solid rgba(10, 52, 108, .12);
-          border-radius: 18px;
+          border-radius: 20px;
           background: #fff;
-          box-shadow: 0 34px 90px rgba(0,0,0,.40), 0 10px 28px rgba(4,47,105,.18);
+          box-shadow: 0 36px 90px rgba(0,0,0,.34), 0 10px 26px rgba(4, 47, 105, .12), inset 0 1px 0 rgba(255,255,255,.94);
+          scrollbar-width: thin;
+          scrollbar-color: rgba(10, 54, 112, .24) transparent;
         }
         .ev-enquiry-banner-wrap {
+          position: relative;
           width: 100%;
           overflow: hidden;
-          border-radius: 18px 18px 0 0;
+          border-radius: 24px 24px 0 0;
           background: #061c3f;
         }
         .ev-enquiry-banner {
@@ -672,134 +700,152 @@ export default function Home() {
         }
         .ev-enquiry-close {
           position: absolute;
-          top: -54px;
-          right: 6px;
-          width: 42px;
-          height: 42px;
+          top: -46px;
+          right: 0;
+          width: 38px;
+          height: 38px;
           display: grid;
           place-items: center;
-          padding: 0;
           border: 0;
           background: transparent;
           color: #fff;
-          font-size: 36px;
+          font-size: 34px;
           font-weight: 400;
           line-height: 1;
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
-          text-shadow: 0 2px 12px rgba(0,0,0,.58);
+          text-shadow: 0 2px 10px rgba(0,0,0,.55);
         }
-        .ev-enquiry-close:active { transform: scale(.90); opacity: .74; }
+        .ev-enquiry-close:active { transform: scale(.90); opacity: .72; }
         .ev-enquiry-modal-body {
-          height: calc(64vh - 174px);
-          max-height: calc(860px - 174px);
-          min-height: 306px;
+          max-height: calc(min(70vh, 610px) - 174px);
           overflow-y: auto;
+          padding: 15px 17px 17px;
+          background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
           overscroll-behavior: contain;
-          padding: 22px 32px 24px;
-          background: #fff;
+        }
+        .ev-enquiry-modal-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          margin-bottom: 6px;
+          color: #0b5cbb;
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .18em;
+          text-transform: uppercase;
+        }
+        .ev-enquiry-modal-label::before {
+          content: '';
+          width: 18px;
+          height: 2.5px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #0b5cbb, #1d8bff);
+        }
+        .ev-enquiry-modal-title {
+          margin: 0;
+          color: #0a1c3d;
+          font-size: clamp(19px, 3.1vw, 23px);
+          line-height: 1.04;
+          letter-spacing: -.045em;
+        }
+        .ev-enquiry-modal-subtitle {
+          margin: 6px 0 12px;
+          color: #63748f;
+          font-size: 12px;
+          line-height: 1.42;
         }
         .ev-enquiry-form {
           display: grid;
-          gap: 14px;
+          gap: 8px;
           margin: 0;
-          padding: 0;
-          border: 0;
-          border-radius: 0;
-          background: transparent;
-          box-shadow: none;
         }
         .ev-enquiry-form label {
           display: grid;
-          gap: 7px;
+          gap: 5px;
           color: #223a62;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 900;
-          letter-spacing: .08em;
+          letter-spacing: .07em;
           text-transform: uppercase;
+        }
+        .ev-enquiry-form .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1.15fr;
+          gap: 12px;
         }
         .ev-enquiry-form input,
         .ev-enquiry-form textarea,
         .ev-enquiry-form select {
           width: 100%;
-          min-height: 58px;
-          box-sizing: border-box;
-          padding: 0 16px;
-          border: 1.5px solid #5e6874;
+          min-height: 42px;
+          padding: 0 11px;
+          border: 1.5px solid rgba(18, 34, 58, .40);
           border-radius: 10px;
           outline: none;
           background: #fff;
-          color: #1d2e49;
-          font-size: 18px;
-          font-weight: 500;
+          color: #172842;
+          font-size: 14px;
+          font-weight: 600;
           letter-spacing: 0;
           text-transform: none;
           user-select: text;
           -webkit-user-select: text;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.94);
-        }
-        .ev-enquiry-form select {
-          appearance: auto;
-          -webkit-appearance: auto;
-          padding-right: 42px;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.92), 0 2px 7px rgba(8, 33, 73, .03);
+          transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
         }
         .ev-enquiry-form textarea {
-          min-height: 74px;
-          padding-top: 13px;
-          padding-bottom: 13px;
+          min-height: 62px;
+          padding-top: 10px;
+          padding-bottom: 10px;
           resize: vertical;
-          line-height: 1.35;
         }
         .ev-enquiry-form input::placeholder,
         .ev-enquiry-form textarea::placeholder {
-          color: #737d8a;
+          color: #7b8799;
           opacity: 1;
           font-weight: 500;
         }
         .ev-enquiry-form input:focus,
         .ev-enquiry-form textarea:focus,
         .ev-enquiry-form select:focus {
-          border-color: #0b5cbb;
-          box-shadow: 0 0 0 3px rgba(11,92,187,.10);
+          border-color: #1769d2;
+          box-shadow: 0 0 0 3px rgba(23, 105, 210, .10), inset 0 1px 0 rgba(255,255,255,.95);
         }
         .ev-enquiry-form > .btn,
         .ev-enquiry-form button[type='submit'] {
           width: 100%;
-          min-height: 60px;
+          min-height: 44px;
           margin-top: 2px;
-          border: 0;
           border-radius: 10px;
-          background: linear-gradient(145deg, #084b88 0%, #063b6d 52%, #052f58 100%);
-          box-shadow: 0 10px 22px rgba(5,48,93,.24), inset 0 1px 0 rgba(255,255,255,.15), inset 0 -3px 0 rgba(0,0,0,.16);
+          background: linear-gradient(145deg, #0c4a85 0%, #063665 55%, #052d59 100%);
+          box-shadow: 0 10px 20px rgba(5, 48, 93, .22), inset 0 1px 0 rgba(255,255,255,.16), inset 0 -3px 0 rgba(0,0,0,.15);
           color: #fff;
-          font-size: 18px;
-          font-weight: 800;
+          font-size: 14px;
+          font-weight: 900;
           letter-spacing: .01em;
-          cursor: pointer;
-          -webkit-tap-highlight-color: transparent;
         }
         .ev-enquiry-form > .btn:active,
-        .ev-enquiry-form button[type='submit']:active { transform: translateY(2px); opacity: .84; }
+        .ev-enquiry-form button[type='submit']:active { transform: translateY(2px); opacity: .82; }
         .ev-enquiry-form .form-note { font-size: 10px; line-height: 1.35; }
         @media (max-width: 560px) {
-          .ev-enquiry-overlay { padding: 20px 0 24px; }
-          .ev-enquiry-stage { width: min(580px, calc(100vw - 28px)); }
-          .ev-enquiry-modal { height: 64vh; min-height: 470px; border-radius: 18px; }
+          .ev-enquiry-overlay { padding: 12px 8px 18px; }
+          .ev-enquiry-stage { width: min(520px, calc(100vw - 16px)); }
+          .ev-enquiry-modal { width: 100%; max-height: 68vh; border-radius: 18px; }
           .ev-enquiry-banner-wrap { border-radius: 18px 18px 0 0; }
-          .ev-enquiry-close { top: -48px; right: 2px; width: 38px; height: 38px; font-size: 34px; }
-          .ev-enquiry-modal-body { height: calc(64vh - 154px); min-height: 316px; padding: 18px 24px 22px; }
-          .ev-enquiry-form { gap: 12px; }
-          .ev-enquiry-form label { font-size: 9px; gap: 6px; }
+          .ev-enquiry-close { top: -40px; right: -1px; width: 34px; height: 34px; font-size: 30px; }
+          .ev-enquiry-modal-body { max-height: calc(68vh - 150px); padding: 13px 13px 15px; }
+          .ev-enquiry-modal-label { font-size: 8.5px; margin-bottom: 5px; }
+          .ev-enquiry-modal-title { font-size: 21px; }
+          .ev-enquiry-modal-subtitle { font-size: 11px; margin: 5px 0 10px; }
+          .ev-enquiry-form { gap: 8px; }
+          .ev-enquiry-form .form-row { grid-template-columns: 1fr; gap: 8px; }
           .ev-enquiry-form input,
           .ev-enquiry-form textarea,
-          .ev-enquiry-form select { min-height: 55px; font-size: 17px; padding-left: 14px; padding-right: 14px; }
-          .ev-enquiry-form textarea { min-height: 68px; }
+          .ev-enquiry-form select { min-height: 42px; font-size: 13px; padding-left: 10px; padding-right: 10px; }
+          .ev-enquiry-form textarea { min-height: 60px; }
           .ev-enquiry-form > .btn,
-          .ev-enquiry-form button[type='submit'] { min-height: 56px; font-size: 17px; }
-        }
-        @media (max-width: 390px) {
-          .ev-enquiry-stage { width: calc(100vw - 18px); }
-          .ev-enquiry-modal-body { padding-left: 17px; padding-right: 17px; }
+          .ev-enquiry-form button[type='submit'] { min-height: 43px; font-size: 13px; }
         }
       `}</style>
 
@@ -1137,12 +1183,99 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="trust-strip">
-        <div className="shell trust-grid">
-          <div><strong>{profile.journeyMonths} Months</strong><span>of focused growth</span></div>
-          <div><strong>~{profile.studentCount}</strong><span>students joined</span></div>
-          <div><strong>{profile.classRange}</strong><span>classes supported</span></div>
-          <div><strong>Student-first</strong><span>learning approach</span></div>
+      <style>{`
+        .ev-stats-section {
+          background: linear-gradient(180deg, #f8fbff 0%, #f4f7fc 100%);
+          color: #0d1d3c;
+          padding: 28px 0 34px;
+        }
+        .ev-stats-shell {
+          width: min(100% - 24px, 980px);
+          margin: 0 auto;
+          padding: 14px;
+          border: 1px solid #dbe4f1;
+          border-radius: 28px;
+          background: rgba(255,255,255,.96);
+          box-shadow: 0 20px 48px rgba(20, 45, 95, .10), inset 0 1px 0 rgba(255,255,255,.9);
+        }
+        .ev-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px;
+        }
+        .ev-stat-card {
+          min-height: 168px;
+          padding: 24px 16px;
+          border: 1px solid rgba(255,255,255,.18);
+          border-radius: 24px;
+          display: flex !important;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 12px !important;
+          text-align: center;
+          color: #fff;
+          background: linear-gradient(135deg, #162d8f 0%, #203ba5 48%, #263f89 100%);
+          box-shadow: 0 16px 30px rgba(24, 48, 143, .18), inset 0 1px 0 rgba(255,255,255,.10);
+          overflow: hidden;
+          position: relative;
+        }
+        .ev-stat-card::before {
+          content: '';
+          position: absolute;
+          width: 150px;
+          height: 150px;
+          border-radius: 50%;
+          right: -52px;
+          top: -70px;
+          background: rgba(255,255,255,.08);
+          pointer-events: none;
+        }
+        .ev-stat-card strong {
+          position: relative;
+          z-index: 1;
+          color: #ffd400 !important;
+          font: 900 clamp(34px, 7vw, 56px)/1 Manrope, sans-serif !important;
+          letter-spacing: -.05em;
+          text-shadow: 0 3px 10px rgba(0,0,0,.14);
+        }
+        .ev-stat-card span {
+          position: relative;
+          z-index: 1;
+          color: rgba(255,255,255,.96) !important;
+          font: 500 clamp(14px, 2.7vw, 20px)/1.35 Manrope, sans-serif !important;
+          letter-spacing: 0 !important;
+          text-transform: none !important;
+        }
+        @media (max-width: 430px) {
+          .ev-stats-section { padding: 24px 0 30px; }
+          .ev-stats-shell { padding: 10px; border-radius: 24px; }
+          .ev-stats-grid { gap: 10px; }
+          .ev-stat-card { min-height: 145px; padding: 18px 10px; border-radius: 20px; }
+          .ev-stat-card strong { font-size: 29px !important; }
+          .ev-stat-card span { font-size: 12px !important; }
+        }
+      `}</style>
+      <section className="trust-strip ev-stats-section">
+        <div className="ev-stats-shell">
+          <div className="trust-grid ev-stats-grid">
+            <div className="ev-stat-card">
+              <strong>{animatedStats.years}+</strong>
+              <span>Years of Excellence</span>
+            </div>
+            <div className="ev-stat-card">
+              <strong>{animatedStats.students}+</strong>
+              <span>Students Learned</span>
+            </div>
+            <div className="ev-stat-card">
+              <strong>{animatedStats.subjects}</strong>
+              <span>Subjects Covered</span>
+            </div>
+            <div className="ev-stat-card">
+              <strong>{animatedStats.attention}%</strong>
+              <span>Personal Attention</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1976,75 +2109,62 @@ export default function Home() {
                   alt="EZEE VISION CHAMPUA admission banner"
                 />
               </div>
-
-              <div className="ev-enquiry-modal-body">
-                <form className="ev-enquiry-form" onSubmit={async (e) => {
-                  e.preventDefault();
-                  if (enquiryState.busy) return;
-                  if (enquiryForm.website) return;
-                  const studentName = enquiryForm.studentName.trim();
-                  const parentName = enquiryForm.parentName.trim();
-                  const className = enquiryForm.className.trim();
-                  const phone = enquiryForm.phone.trim();
-                  const message = enquiryForm.message.trim();
-                  if (!studentName || !parentName || !className || !phone) {
-                    setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parents Name, Class and Phone Number.' });
-                    return;
-                  }
-                  if (!/^[0-9+()\-\s]{10,18}$/.test(phone)) {
-                    setEnquiryState({ busy: false, type: 'error', text: 'Please enter a valid phone number.' });
-                    return;
-                  }
-                  if (!firebaseConfigured || !db) {
-                    setEnquiryState({ busy: false, type: 'error', text: 'Enquiry service is temporarily unavailable. Please call or WhatsApp us.' });
-                    return;
-                  }
-                  setEnquiryState({ busy: true, type: '', text: '' });
-                  try {
-                    await addDoc(collection(db, 'enquiries'), {
-                      studentName,
-                      parentName,
-                      className,
-                      phone,
-                      message,
-                      createdAt: serverTimestamp(),
-                      source: 'website-header',
-                      status: 'new'
-                    });
-                    setEnquiryForm({ studentName: '', parentName: '', className: '', phone: '', message: '', website: '' });
-                    setEnquiryState({ busy: false, type: 'success', text: 'Thank you. Your admission enquiry has been received.' });
-                  } catch (error) {
-                    setEnquiryState({ busy: false, type: 'error', text: error?.message || 'Unable to submit your enquiry right now. Please use Call or WhatsApp.' });
-                  }
-                }} noValidate>
-                  <label>Student Name
-                    <input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Name" autoComplete="name" />
-                  </label>
-
-                  <label>Parents Name
-                    <input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Parents name" autoComplete="name" />
-                  </label>
-
-                  <label>Phone Number
-                    <input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="PHONE NUMBER" inputMode="tel" autoComplete="tel" />
-                  </label>
-
-                  <label>Select Course (4th to 12th)
-                    <select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}>
-                      <option value="" disabled>Select Course</option>
-                      {['4','5','6','7','8','9','10','11','12'].map((c) => <option key={c} value={c}>Class {c}</option>)}
-                    </select>
-                  </label>
-
-                  <label>Message
-                    <textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Message (optional)"></textarea>
-                  </label>
-
-                  {enquiryState.text ? <div className={enquiryState.type === 'error' ? 'form-note form-note-error' : 'form-note form-note-success'} role="status">{enquiryState.text}</div> : null}
-                  <button className="btn btn-primary btn-lg" type="submit" disabled={enquiryState.busy}>{enquiryState.busy ? 'Submitting…' : 'Send Enquiry'}</button>
-                </form>
+            <div className="ev-enquiry-modal-body">
+              <div className="ev-enquiry-modal-label">Admission Enquiry</div>
+              <h2 className="ev-enquiry-modal-title">Join EZEE VISION CHAMPUA</h2>
+              <p className="ev-enquiry-modal-subtitle">Share your details and our coaching team will contact you regarding classes, batches and admission information.</p>
+            <form className="enquiry-form ev-enquiry-form" onSubmit={async (e) => {
+              e.preventDefault();
+              if (enquiryState.busy) return;
+              if (enquiryForm.website) return;
+              const studentName = enquiryForm.studentName.trim();
+              const parentName = enquiryForm.parentName.trim();
+              const className = enquiryForm.className.trim();
+              const phone = enquiryForm.phone.trim();
+              const message = enquiryForm.message.trim();
+              if (!studentName || !parentName || !className || !phone) {
+                setEnquiryState({ busy: false, type: 'error', text: 'Please fill Student Name, Parent / Guardian Name, Class and Phone.' });
+                return;
+              }
+              if (!/^[0-9+()\-\s]{10,18}$/.test(phone)) {
+                setEnquiryState({ busy: false, type: 'error', text: 'Please enter a valid phone number.' });
+                return;
+              }
+              if (!firebaseConfigured || !db) {
+                setEnquiryState({ busy: false, type: 'error', text: 'Enquiry service is temporarily unavailable. Please call or WhatsApp us.' });
+                return;
+              }
+              setEnquiryState({ busy: true, type: '', text: '' });
+              try {
+                await addDoc(collection(db, 'enquiries'), {
+                  studentName,
+                  parentName,
+                  className,
+                  phone,
+                  message,
+                  createdAt: serverTimestamp(),
+                  source: 'website-header',
+                  status: 'new'
+                });
+                setEnquiryForm({ studentName: '', parentName: '', className: '', phone: '', message: '', website: '' });
+                setEnquiryState({ busy: false, type: 'success', text: 'Thank you. Your admission enquiry has been received.' });
+              } catch (error) {
+                setEnquiryState({ busy: false, type: 'error', text: error?.message || 'Unable to submit your enquiry right now. Please use Call or WhatsApp.' });
+              }
+            }} noValidate>
+              <label>Student Name<input value={enquiryForm.studentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, studentName: e.target.value }))} placeholder="Enter student name" autoComplete="name" /></label>
+              <label>Parent / Guardian Name<input value={enquiryForm.parentName} onChange={(e) => setEnquiryForm((v) => ({ ...v, parentName: e.target.value }))} placeholder="Enter parent or guardian name" autoComplete="name" /></label>
+              <div className="form-row">
+                <label>Class<select value={enquiryForm.className} onChange={(e) => setEnquiryForm((v) => ({ ...v, className: e.target.value }))}><option value="" disabled>Select class</option>{['4','5','6','7','8','9','10','11','12'].map((c) => <option key={c}>{c}</option>)}</select></label>
+                <label>Phone<input value={enquiryForm.phone} onChange={(e) => setEnquiryForm((v) => ({ ...v, phone: e.target.value }))} placeholder="10-digit mobile number" inputMode="tel" autoComplete="tel" /></label>
               </div>
+              <label>Message<textarea value={enquiryForm.message} onChange={(e) => setEnquiryForm((v) => ({ ...v, message: e.target.value }))} placeholder="Tell us what you would like to know..."></textarea></label>
+              {enquiryState.text ? <div className={enquiryState.type === 'error' ? 'form-note form-note-error' : 'form-note form-note-success'} role="status">{enquiryState.text}</div> : null}
+              <button className="btn btn-primary btn-lg" type="submit" disabled={enquiryState.busy}>{enquiryState.busy ? 'Submitting…' : <>Submit Enquiry <span>→</span></>}</button>
+              <small className="form-note">Your details are used only to respond to this admission enquiry.</small>
+            </form>
             </div>
+          </div>
           </div>
         </div>
       ) : null}
