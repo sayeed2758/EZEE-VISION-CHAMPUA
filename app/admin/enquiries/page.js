@@ -112,7 +112,7 @@ export default function EnquiriesManagerPage() {
 
   function exportCsv() {
     const rows = [
-      ['Student Name', 'Parent / Guardian', 'Class', 'Phone', 'Message', 'Status', 'Created At'],
+      ['Student Name', 'Parents Name', 'Course', 'Phone Number', 'Message', 'Status', 'Created At'],
       ...filtered.map((item) => [
         item.studentName || '',
         item.parentName || '',
@@ -218,13 +218,13 @@ export default function EnquiriesManagerPage() {
                     <div>
                       <span className={styles.kicker}>{formatDate(item.createdAt)}</span>
                       <h3>{item.studentName || 'Student enquiry'}</h3>
-                      <p className={styles.parentLine}>Parent / Guardian: <b>{item.parentName || '—'}</b></p>
+                      <p className={styles.parentLine}>Parents Name: <b>{item.parentName || '—'}</b></p>
                     </div>
                     <span className={`${styles.statusBadge} ${styles[`status_${status.replace(/[^a-z-]/g, '')}`] || styles.status_new}`}>{status}</span>
                   </div>
 
                   <div className={styles.metaGrid}>
-                    <div><span>CLASS</span><b>{item.className || '—'}</b></div>
+                    <div><span>COURSE</span><b>{item.className || '—'}</b></div>
                     <div><span>PHONE</span><b>{item.phone || '—'}</b></div>
                     <div><span>SOURCE</span><b>{item.source || 'website'}</b></div>
                   </div>
